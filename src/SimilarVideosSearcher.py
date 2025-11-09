@@ -2,12 +2,7 @@ from dataclasses import dataclass
 from IVideoAnalyzer import IVideoAnalyzer
 from DbAccessor import DbAccessor
 from models.Video import Video
-
-
-@dataclass
-class SimilarVideoGroup:
-    reference_video: str
-    similar_videos: dict[str, float]
+from models.SimilarVideoGroup import SimilarVideoGroup
 
 
 class SimilarVideosSearcher:
@@ -48,6 +43,6 @@ class SimilarVideosSearcher:
             if len(similar_group.similar_videos) > 0:
                 similar_group_list.append(similar_group)
 
-        # 2.精化相似组，处理被重复添加的视频，只保留相似值最大的视频
+        # 2.精化相似组，处理被重复添加的视频，只保留相似度最大的组
 
         return []

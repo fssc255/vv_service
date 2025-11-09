@@ -1,3 +1,8 @@
+## 环境信息
+
+Python 版本: 3.13.9
+依赖第三方包：见 [requirements.txt](./requirements.txt)
+
 ## 项目结构
 
 **目录结构说明**
