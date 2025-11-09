@@ -1,0 +1,2 @@
+class InvalidVideoIdError(Exception):
+    pass
