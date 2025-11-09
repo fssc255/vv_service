@@ -3,8 +3,12 @@
 ### （1）请求执行相似视频查找
 
 **REQUEST**
-Endpoint: http://127.0.0.1:6590/api/va
-Method: POST
+
+| 属性     | 值                           |
+| -------- | ---------------------------- |
+| Endpoint | http://127.0.0.1:6590/api/va |
+| Method   | POST                         |
+
 Body:
 
 ```json
@@ -55,9 +59,11 @@ data 为一个数组，表示相似的视频组。
 ### （2）添加视频
 
 **REQUEST**
-Endpoint: http://127.0.0.1:6590/api/va
-Method: POST
-Body:
+
+| 属性     | 值                           |
+| -------- | ---------------------------- |
+| Endpoint | http://127.0.0.1:6590/api/va |
+| Method   | POST                         |
 
 ```json
 {
@@ -108,8 +114,12 @@ Body:
 ### （3）删除视频
 
 **REQUEST**
-Endpoint: http://127.0.0.1:6590/api/va
-Method: POST
+
+| 属性     | 值                           |
+| -------- | ---------------------------- |
+| Endpoint | http://127.0.0.1:6590/api/va |
+| Method   | POST                         |
+
 Body:
 
 ```json
