@@ -1,2 +1,2 @@
-class InvalidVideoIdError(Exception):
+class InvalidVideoIdError(BaseException):
     pass
