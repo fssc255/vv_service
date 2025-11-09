@@ -3,20 +3,10 @@ from dataclasses import dataclass
 from mysql.connector.abstracts import MySQLConnectionAbstract
 from mysql.connector.pooling import PooledMySQLConnection
 from typing import Any
+from models.Video import Video
 import mysql.connector
 
-
-@dataclass
-class Video:
-    id: str
-    video_url: str
-    cover_url: str
-    size: str
-    name: str
-    uploader: str
-    content: str
-    record_time: str
-    upload_time: str
+from models.VideoMetadata import VideoMetadata
 
 
 class DbAccessor:
@@ -58,6 +48,9 @@ class DbAccessor:
             return []
         finally:
             cursor.close()
+
+    def get_video_metadata(self, video_id: str) -> VideoMetadata:
+        raise NotImplementedError
 
     def __enter__(self):
         return self
