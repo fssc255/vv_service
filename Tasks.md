@@ -99,17 +99,17 @@ data 为一个数组，表示相似的视频组。
 }
 ```
 
-| 字段       | 类型   | 说明                                            |
-| ---------- | ------ | ----------------------------------------------- |
-| width      | int    | 视频画面宽度                                    |
-| height     | int    | 视频画面高度                                    |
-| fps        | float  | 视频帧率                                        |
-| duration   | int    | 视频时长，单位秒                                |
-| fileType   | string | 视频文件类型，确保全小写                        |
-| fileSize   | int    | 视频文件大小，单位为字节                        |
-| createTime | int    | 视频文件创建时间，unix 时间戳（秒单位，秒精度） |
-| modifyTime | int    | 视频文件创建时间，unix 时间戳（秒单位，秒精度） |
-| md5        | string | 视频文件的 md5，全小写                          |
+| 字段       | 类型          | 说明                                              |
+| ---------- | ------------- | ------------------------------------------------- |
+| width      | int \| null   | 视频画面宽度                                      |
+| height     | int \| null   | 视频画面高度                                      |
+| fps        | float \| null | 视频帧率                                          |
+| duration   | int \| null   | 视频时长，单位秒                                  |
+| fileType   | string        | 视频文件类型，确保全小写                          |
+| fileSize   | int           | 视频文件大小，单位为字节                          |
+| createTime | int           | 视频文件的创建时间，unix 时间戳（秒单位，秒精度） |
+| modifyTime | int           | 视频文件的修改时间，unix 时间戳（秒单位，秒精度） |
+| md5        | string        | 视频文件的 md5，全小写                            |
 
 ### （3）删除视频
 
@@ -154,19 +154,19 @@ Body:
 **后端部分**
 （1）添加一个名为 video_metadata 的表，表结构如下
 
-| 字段        | 类型                  |
-| ----------- | --------------------- |
-| id          | BIGINT AUTO_INCREMENT |
-| video_id    | VARCHAR(36)           |
-| width       | INT                   |
-| height      | INT                   |
-| fps         | FLOAT                 |
-| duration    | INT                   |
-| file_type   | VARCHAR(32)           |
-| file_size   | BIGINT                |
-| create_time | BIGINT                |
-| modify_time | BIGINT                |
-| md5         | CHAR(32)              |
+| 字段        | 类型                  | 可空 |
+| ----------- | --------------------- | ---- |
+| id          | BIGINT AUTO_INCREMENT |      |
+| video_id    | VARCHAR(36)           |      |
+| width       | INT                   | Y    |
+| height      | INT                   | Y    |
+| fps         | FLOAT                 | Y    |
+| duration    | INT                   | Y    |
+| file_type   | VARCHAR(32)           |      |
+| file_size   | BIGINT                |      |
+| create_time | BIGINT                |      |
+| modify_time | BIGINT                |      |
+| md5         | CHAR(32)              |      |
 
 （2）在视频上传完成后，添加对“添加视频”接口的调用，然后将接口的返回结果存到 video_metadata 表中。同样的，当删除视频后也添加对“删除视频”接口的调用。这两个接口务必后调用，因为要依赖 mysql 中的数据与视频文件。
 （3）程序假定了 mysql 数据库 video_manage_system 的存在，请添加当数据库不存在时自动创建的行为。
