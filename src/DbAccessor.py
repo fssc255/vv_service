@@ -1,12 +1,10 @@
 from Config import Config
-from dataclasses import dataclass
 from mysql.connector.abstracts import MySQLConnectionAbstract
 from mysql.connector.pooling import PooledMySQLConnection
 from typing import Any
 from models.Video import Video
-import mysql.connector
-
 from models.VideoMetadata import VideoMetadata
+import mysql.connector
 
 
 class DbAccessor:

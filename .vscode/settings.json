@@ -7,5 +7,8 @@
         "**/Thumbs.db": true,
         "**/__pycache__": true,
         "**/.vscode": true,
-    }
+    },
+    "cSpell.words": [
+        "pymediainfo"
+    ]
 }
