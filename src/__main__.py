@@ -15,13 +15,13 @@ def test():
     )
     save_images(keyframe_images, "kf1")
 
+
+    # 2：自定义采样点
     class WTFKeyframeSelector(IKeyframeSelector):
         def get_frame_position(self, keyframe_index: int, total_frame_count: int) -> int:
             # 第 i 个关键帧在视频的第 i * 90 帧获取
             return keyframe_index * 90
 
-
-    # 2：自定义采样点
     keyframe_images = KeyframeSampler.sample(
         video_file_path=R"/mnt/c/Users/11717/Desktop/old_files/视频类/(.mp4) MP4 视频文件/00016.mp4",
         keyframe_count=10,
