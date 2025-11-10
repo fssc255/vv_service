@@ -3,7 +3,7 @@ import cv2
 
 
 class IKeyframeSelector:
-    def get_frame_position(self, keyframe_index: int) -> int:
+    def get_frame_position(self, keyframe_index: int, total_frame_count: int) -> int:
         """
         根据关键帧索引返回对应的视频帧序号
 
@@ -21,31 +21,30 @@ class IKeyframeSelector:
 
 class KeyframeSampler:
     @staticmethod
-    def sample(video_path: str, keyframe_count: int, frame_selector: IKeyframeSelector | None = None) -> list[Image.Image]:
+    def sample(video_file_path: str, keyframe_count: int, keyframe_selector: IKeyframeSelector | None = None) -> list[Image.Image]:
         """
-        按照固定时间间隔从视频中采样关键帧
+        从视频中采样固定数量的关键帧
 
         Args:
-            video_path: 视频文件路径
-            keyframe_count: 采样帧数量
+            video_file_path: 视频文件路径
+            keyframe_count: 需要的关键帧数量
+            frame_selector: 帧位选择器，决定第n个关键帧在视频的第几帧采样；若为None则自动平均间隔采样。
 
         Returns:
             list[Image.Image]: 采样到的关键帧PIL图像列表
         """
-        cap = cv2.VideoCapture(video_path)
+        cap = cv2.VideoCapture(video_file_path)
         if not cap.isOpened():
             raise ValueError("无法打开视频文件")
 
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        if fps == 0:
-            cap.release()
-            raise ValueError("无法获取视频帧率")
+        total_frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         sampling_frames: list[int] = []
-        if frame_selector is not None:
-            sampling_frames = [frame_selector.get_frame_position(x) for x in range(keyframe_count)]
+        if keyframe_selector is not None:
+            sampling_frames = [
+                keyframe_selector.get_frame_position(x, total_frame_count) for x in range(keyframe_count)
+            ]
         else:
-            total_frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             interval = total_frame_count // keyframe_count
             for i in range(keyframe_count):
                 sampling_frames.append(i * interval)
@@ -53,7 +52,7 @@ class KeyframeSampler:
         keyframes = []
         processed_frame_index = 0
 
-        while sampled_frame_index <= len(sampling_frames) - 1:
+        while len(keyframes) < keyframe_count:
             ret, frame = cap.read()
 
             if not ret:
@@ -65,6 +64,52 @@ class KeyframeSampler:
                 pil_image = Image.fromarray(frame_rgb)
                 keyframes.append(pil_image)
                 sampled_frame_index += 1
+
+            processed_frame_index += 1
+
+        cap.release()
+
+        return keyframes
+
+    @staticmethod
+    def sample_at_fixed_interval(video_file_path: str, interval: float) -> list[Image.Image]:
+        """
+        从视频中按固定时间间隔采样关键帧
+
+        Args:
+            video_file_path: 视频文件路径
+            interval: 采样间隔（秒）
+
+        Returns:
+            list[Image.Image]: 采样到的关键帧PIL图像列表
+        """
+        cap = cv2.VideoCapture(video_file_path)
+        if not cap.isOpened():
+            raise ValueError("无法打开视频文件")
+
+        fps = cap.get(cv2.CAP_PROP_FPS)  #
+        if fps == 0:
+            cap.release()
+            raise ValueError("无法获取视频帧率")
+
+        frame_interval = int(interval * fps)
+        if frame_interval <= 0:
+            frame_interval = 1
+
+        keyframes = []
+        processed_frame_index = 0
+
+        while True:
+            ret, frame = cap.read()
+
+            if not ret:
+                break
+
+            if processed_frame_index % frame_interval == 0:
+                print(f"采样第{len(keyframes) + 1}个关键帧(视频第{processed_frame_index}帧)")
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                pil_image = Image.fromarray(frame_rgb)
+                keyframes.append(pil_image)
 
             processed_frame_index += 1
 
