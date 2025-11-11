@@ -168,7 +168,7 @@ Body:
 | modify_time | BIGINT                |      |
 | md5         | CHAR(32)              |      |
 
-（2）在视频上传完成时，先添加对“添加视频”接口的调用，将接口的返回结果存到 video_metadata 表中，然后再继续执行原先流程。同样的，在删除视频后添加对“删除视频”接口的调用。这两个接口务必后调用，因为要依赖 mysql 中的数据与视频文件。
+（2）在视频上传完成后，添加对“添加视频”接口的调用，然后将接口的返回结果存到 video_metadata 表中。同样的，当删除视频后也添加对“删除视频”接口的调用。这两个接口务必后调用，因为要依赖 mysql 中的数据与视频文件。
 （3）程序假定了 mysql 数据库 video_manage_system 的存在，请添加当数据库不存在时自动创建的行为。
 
 注：前文所述的 API 的 endpoint 的 IP 地址与端口号仅做示例，实际请放在配置文件中
@@ -226,13 +226,13 @@ participant DB as 数据库
 
     User->>Frontend: 上传视频文件
     Frontend->>Backend: 上传视频请求
+    Backend->>DB: 存储视频文件与基本信息
+    DB->>Backend: 存储确认
     Backend->>Algorithm: POST /api/vv/action<br/>{action: "VA:ADD_VIDEO", videoId: "xxx", videoFilePath: "yyy"}
 
-    Algorithm->>Algorithm: 计算特征向量和元数据
-    Algorithm->>DB: 存储特征向量
+    Algorithm->>DB: 计算并存储特征向量
     Algorithm->>Backend: 返回视频元数据
-
-    Backend->>DB: 存储视频文件、基本信息（videos、video_metadata）
+    Backend->>DB: 存储元数据到video_metadata表
     DB->>Backend: 存储确认
     Backend->>Frontend: 上传成功响应
     Frontend->>User: 显示上传成功
