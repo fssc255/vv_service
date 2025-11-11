@@ -9,6 +9,7 @@
         "**/.vscode": true,
     },
     "cSpell.words": [
+        "fromarray",
         "pymediainfo"
     ]
 }
