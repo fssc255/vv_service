@@ -28,15 +28,15 @@ class DbAccessor:
             videos = []
             for row in results:
                 video = Video(
-                    id=row['id'],
-                    video_url=row['video_url'],
-                    cover_url=row['cover_url'],
-                    size=row['size'],
-                    name=row['name'],
-                    uploader=row['uploader'],
-                    content=row['content'],
-                    record_time=row['record_time'],
-                    upload_time=row['upload_time']
+                    id=row["id"],
+                    video_url=row["video_url"],
+                    cover_url=row["cover_url"],
+                    size=row["size"],
+                    name=row["name"],
+                    uploader=row["uploader"],
+                    content=row["content"],
+                    record_time=row["record_time"],
+                    upload_time=row["upload_time"]
                 )
                 videos.append(video)
 
@@ -44,11 +44,49 @@ class DbAccessor:
         except mysql.connector.Error as e:
             print(f"数据库查询错误: {e}")
             return []
+        except Exception as e:
+            print(f"未知错误: {e}")
+            return []
         finally:
             cursor.close()
 
-    def get_video_metadata(self, video_id: str) -> VideoMetadata:
-        raise NotImplementedError
+    def get_video_metadata(self, video_id: str) -> VideoMetadata | None:
+        query = f"""
+        SELECT id, video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5
+        FROM video_metadata
+        WHERE video_id=%s
+        """
+
+        conn = self.__get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        try:
+            cursor.execute(query, (video_id,))
+            result: Any = cursor.fetchone()
+
+            if result is None:
+                return None
+
+            video_metadata = VideoMetadata(
+                width=result["width"],
+                height=result["height"],
+                fps=result["fps"],
+                duration=result["duration"],
+                file_type=result["file_type"],
+                file_size=result["file_size"],
+                create_time=result["create_time"],
+                modify_time=result["modify_time"],
+                md5=result["md5"],
+            )
+            return video_metadata
+        except mysql.connector.Error as e:
+            print(f"数据库查询错误: {e}")
+            return None
+        except Exception as e:
+            print(f"未知错误: {e}")
+            return None
+        finally:
+            cursor.close()
 
     def __enter__(self):
         return self

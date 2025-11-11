@@ -19,7 +19,7 @@ class IKeyframeSelector:
         raise NotImplementedError
 
 
-class KeyframeSampler:
+class KeyframesSampler:
     @staticmethod
     def sample(video_file_path: str, keyframe_count: int, keyframe_selector: IKeyframeSelector | None = None) -> list[Image.Image]:
         """
