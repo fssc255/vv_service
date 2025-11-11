@@ -1,5 +1,5 @@
 def main():
-    print("Hello from example!")
+    print("Hello from vv-service!")
 
 
 if __name__ == "__main__":

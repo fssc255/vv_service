@@ -206,7 +206,7 @@ sequenceDiagram
 
     User->>Frontend: 点击"查重"按钮
     Frontend->>Backend: POST /api/duplicate-check
-    Backend->>Algorithm: POST /api/va/action<br/>{action: "VA:FIND_SIMILAR_VIDEOS", threshold: 0.9}
+    Backend->>Algorithm: POST /api/va<br/>{action: "VA:FIND_SIMILAR_VIDEOS", threshold: 0.9}
 
     Algorithm->>Algorithm: 计算所有视频相似度
     Algorithm->>Backend: 返回相似视频组
@@ -228,7 +228,7 @@ participant DB as 数据库
     Frontend->>Backend: 上传视频请求
     Backend->>DB: 存储视频文件与基本信息
     DB->>Backend: 存储确认
-    Backend->>Algorithm: POST /api/vv/action<br/>{action: "VA:ADD_VIDEO", videoId: "xxx", videoFilePath: "yyy"}
+    Backend->>Algorithm: POST /api/va<br/>{action: "VA:ADD_VIDEO", videoId: "xxx", videoFilePath: "yyy"}
 
     Algorithm->>DB: 计算并存储特征向量
     Algorithm->>Backend: 返回视频元数据
@@ -251,7 +251,7 @@ participant DB as 数据库
     User->>Frontend: 请求删除视频
     Frontend->>Backend: 删除视频请求
     Backend->>DB: 删除视频
-    Backend->>Algorithm: POST /api/vv/action<br/>{action: "VA:REMOVE_VIDEO", videoId: "xxx" }
+    Backend->>Algorithm: POST /api/va<br/>{action: "VA:REMOVE_VIDEO", videoId: "xxx" }
 
     Algorithm->>DB: 更新特征向量数据库
     DB->>Backend: 存储确认
