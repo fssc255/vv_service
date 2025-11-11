@@ -9,7 +9,9 @@
         "**/.vscode": true,
     },
     "cSpell.words": [
+        "ddof",
         "fromarray",
+        "IMAGENET",
         "pymediainfo"
     ]
 }

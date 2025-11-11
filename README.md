@@ -26,12 +26,13 @@ cd src && uv run . # .表示文件 __main__.py
 
 **目录结构说明**
 
-| 目录名 | 说明                                                    |
-| ------ | ------------------------------------------------------- |
-| errors | 异常类                                                  |
-| models | 关系型数据库（MySql）中的数据模型定义                   |
-| utils  | 工具类                                                  |
-| my_va  | [IVideoAnalyzer.py](./src/IVideoAnalyzer.py) 的实现样例 |
+| 目录名   | 说明                                                    |
+| -------- | ------------------------------------------------------- |
+| errors   | 异常类                                                  |
+| models   | 关系型数据库（MySql）中的数据模型定义                   |
+| utils    | 工具类                                                  |
+| storages | 持久化相关类                                            |
+| my_va    | [IVideoAnalyzer.py](./src/IVideoAnalyzer.py) 的实现样例 |
 
 **关键文件说明**
 
@@ -43,11 +44,17 @@ cd src && uv run . # .表示文件 __main__.py
 
 **工具类（utils）说明**
 
-| 文件                                                   | 说明                              |
-| ------------------------------------------------------ | --------------------------------- |
-| [DbAccessor.py](./src/utils/DbAccessor.py)             | 访问关系型数据库（MySql）中的数据 |
-| [Logger.py](./src/utils/Logger.py)                     | 用于打印日志信息                  |
-| [KeyframesSampler.py](./src/utils/KeyframesSampler.py) | 用于对视频文件中进行帧采样        |
+| 文件                                                   | 说明                       |
+| ------------------------------------------------------ | -------------------------- |
+| [Logger.py](./src/utils/Logger.py)                     | 用于打印日志信息           |
+| [KeyframesSampler.py](./src/utils/KeyframesSampler.py) | 用于对视频文件中进行帧采样 |
+
+**工具类（storages）说明**
+
+| 文件                                                      | 说明                              |
+| --------------------------------------------------------- | --------------------------------- |
+| [DbAccessor.py](./src/storages/DbAccessor.py)             | 访问关系型数据库（MySql）中的数据 |
+| [VectorDbAccessor.py](./src/storages/VectorDbAccessor.py) | 访问向量数据库中的数据            |
 
 ## 命名规则
 
