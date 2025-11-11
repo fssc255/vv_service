@@ -10,9 +10,11 @@ def test():
 
 import utils.DbAccessor_example
 import utils.KeyframesSampler_example
+import utils.Logger_example
 
 # utils.DbAccessor_example.example()
-utils.KeyframesSampler_example.example()
+# utils.KeyframesSampler_example.example()
+utils.Logger_example.example()
 
 # va = MyVideoAnalyzer()
 

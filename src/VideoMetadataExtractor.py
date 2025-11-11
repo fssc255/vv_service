@@ -61,7 +61,6 @@ class VideoMetadataExtractor:
                     md5_hash.update(chunk)
                     chunk = file.read(chunk_size)
 
-            # 返回32位小写十六进制字符串
             return md5_hash.hexdigest().lower()
         except:
             return None

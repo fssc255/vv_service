@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from IVideoAnalyzer import IVideoAnalyzer
-from DbAccessor import DbAccessor
+from utils.DbAccessor import DbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 
@@ -8,7 +8,9 @@ from models.SimilarVideoGroup import SimilarVideoGroup
 class SimilarVideosSearcher:
     @staticmethod
     def find_similar_videos(videoAnalyzer: IVideoAnalyzer, threshold: float) -> list[SimilarVideoGroup]:
-        videos = DbAccessor().get_videos()
+        with DbAccessor() as db_accessor:
+            videos = db_accessor.get_videos()
+
         compare_cache: dict[str, float] = {}
         similar_group_list: list[SimilarVideoGroup] = []
 
@@ -44,5 +46,6 @@ class SimilarVideosSearcher:
                 similar_group_list.append(similar_group)
 
         # 2.精化相似组，处理被重复添加的视频，只保留相似度最大的组
+        # TODO
 
         return []

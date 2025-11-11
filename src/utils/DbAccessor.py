@@ -4,6 +4,7 @@ from mysql.connector.pooling import PooledMySQLConnection
 from typing import Any
 from models.Video import Video
 from models.VideoMetadata import VideoMetadata
+from utils.Logger import Logger
 import mysql.connector
 
 
@@ -41,11 +42,8 @@ class DbAccessor:
                 videos.append(video)
 
             return videos
-        except mysql.connector.Error as e:
-            print(f"数据库查询错误: {e}")
-            return []
         except Exception as e:
-            print(f"未知错误: {e}")
+            Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
             return []
         finally:
             cursor.close()
@@ -79,11 +77,8 @@ class DbAccessor:
                 md5=result["md5"],
             )
             return video_metadata
-        except mysql.connector.Error as e:
-            print(f"数据库查询错误: {e}")
-            return None
         except Exception as e:
-            print(f"未知错误: {e}")
+            Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
             return None
         finally:
             cursor.close()
