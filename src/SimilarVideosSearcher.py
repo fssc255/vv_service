@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from IVideoAnalyzer import IVideoAnalyzer
-from utils.DbAccessor import DbAccessor
+from VideoAnalyzer import VideoAnalyzer
+from storages.DbAccessor import DbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 
 
 class SimilarVideosSearcher:
     @staticmethod
-    def find_similar_videos(videoAnalyzer: IVideoAnalyzer, threshold: float) -> list[SimilarVideoGroup]:
+    def find_similar_videos(videoAnalyzer: VideoAnalyzer, threshold: float) -> list[SimilarVideoGroup]:
         with DbAccessor() as db_accessor:
             videos = db_accessor.get_videos()
 

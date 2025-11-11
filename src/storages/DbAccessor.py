@@ -4,11 +4,12 @@ from mysql.connector.pooling import PooledMySQLConnection
 from typing import Any
 from models.Video import Video
 from models.VideoMetadata import VideoMetadata
+from storages.IDbAccessor import IDbAccessor
 from utils.Logger import Logger
 import mysql.connector
 
 
-class DbAccessor:
+class DbAccessor(IDbAccessor):
     def __init__(self) -> None:
         self.__conn:  MySQLConnectionAbstract | PooledMySQLConnection | None = None
 

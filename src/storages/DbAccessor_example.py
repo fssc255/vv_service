@@ -1,4 +1,4 @@
-from utils.DbAccessor import DbAccessor
+from storages.DbAccessor import DbAccessor
 
 
 def example():

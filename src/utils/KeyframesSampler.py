@@ -1,4 +1,5 @@
 from PIL import Image
+import numpy as np
 import cv2
 
 
@@ -21,7 +22,7 @@ class IKeyframeSelector:
 
 class KeyframesSampler:
     @staticmethod
-    def sample(video_file_path: str, keyframe_count: int, keyframe_selector: IKeyframeSelector | None = None) -> list[Image.Image]:
+    def sample(video_file_path: str, keyframe_count: int, keyframe_selector: IKeyframeSelector | None = None) -> list[np.ndarray]:
         """
         从视频中采样固定数量的关键帧
 
@@ -31,7 +32,7 @@ class KeyframesSampler:
             frame_selector: 帧位选择器，决定第n个关键帧在视频的第几帧采样；若为None则自动平均间隔采样。
 
         Returns:
-            list[Image.Image]: 采样到的关键帧PIL图像列表
+            list[Image.Image]: 采样到的关键帧图像RGB像素ndarray列表
         """
         cap = cv2.VideoCapture(video_file_path)
         if not cap.isOpened():
@@ -49,7 +50,7 @@ class KeyframesSampler:
             for i in range(keyframe_count):
                 sampling_frames.append(i * interval)
         sampled_frame_index = 0
-        keyframes = []
+        keyframes: list[np.ndarray] = []
         processed_frame_index = 0
 
         while len(keyframes) < keyframe_count:
@@ -61,8 +62,7 @@ class KeyframesSampler:
             if processed_frame_index == sampling_frames[sampled_frame_index]:
                 print(f"采样第{sampled_frame_index}个关键帧(视频第{processed_frame_index}帧)")
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                pil_image = Image.fromarray(frame_rgb)
-                keyframes.append(pil_image)
+                keyframes.append(frame_rgb)
                 sampled_frame_index += 1
 
             processed_frame_index += 1
@@ -72,7 +72,7 @@ class KeyframesSampler:
         return keyframes
 
     @staticmethod
-    def sample_at_fixed_interval(video_file_path: str, interval: float) -> list[Image.Image]:
+    def sample_at_fixed_interval(video_file_path: str, interval: float) -> list[np.ndarray]:
         """
         从视频中按固定时间间隔采样关键帧
 
@@ -81,7 +81,7 @@ class KeyframesSampler:
             interval: 采样间隔（秒）
 
         Returns:
-            list[Image.Image]: 采样到的关键帧PIL图像列表
+            list[Image.Image]: 采样到的关键帧图像RGB像素ndarray列表
         """
         cap = cv2.VideoCapture(video_file_path)
         if not cap.isOpened():
@@ -96,7 +96,7 @@ class KeyframesSampler:
         if frame_interval <= 0:
             frame_interval = 1
 
-        keyframes = []
+        keyframes: list[np.ndarray] = []
         processed_frame_index = 0
 
         while True:
@@ -108,8 +108,7 @@ class KeyframesSampler:
             if processed_frame_index % frame_interval == 0:
                 print(f"采样第{len(keyframes) + 1}个关键帧(视频第{processed_frame_index}帧)")
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                pil_image = Image.fromarray(frame_rgb)
-                keyframes.append(pil_image)
+                keyframes.append(frame_rgb)
 
             processed_frame_index += 1
 
