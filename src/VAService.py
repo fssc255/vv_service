@@ -1,23 +1,57 @@
 from dataclasses import dataclass
 from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
+from models.VideoMetadata import VideoMetadata
 from storages.DbAccessor import DbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
+from storages.IDbAccessor import IDbAccessor
 
 
 class VAService:
     def __init__(self) -> None:
-        self.__videoSimilarityAnalyzer = VideoSimilarityAnalyzer()
+        self.__db_accessor: IDbAccessor = None
+        self.__videoSimilarityAnalyzer = VideoSimilarityAnalyzer(
+            dbAccessor=None,
+            vectorDbAccessor=None,
+        )
 
-    def add_video(self, video_id: str, video_file_path: str) -> bool:
-        raise NotImplementedError
+    def add_video(self, video_id: str, video_file_path: str) -> VideoMetadata:
+        return VideoMetadata(
+            width=1920,
+            height=1080,
+            fps=30.0,
+            duration=120,
+            file_type="mp4",
+            file_size=10485760,
+            create_time=1698765432,
+            modify_time=1698765432,
+            md5="5d41402abc4b2a76b9719d911017c592",
+        )
 
-    def delete_video(self, video: str, video_file_path: str) -> bool:
-        raise NotImplementedError
+    def delete_video(self, video_id: str) -> bool:
+        return True
 
     def find_similar_videos(self, threshold: float) -> list[SimilarVideoGroup]:
-        with DbAccessor() as db_accessor:
-            videos = db_accessor.get_videos()
+        return [
+            SimilarVideoGroup(
+                reference_video="aow05202",
+                similar_videos={
+                    "0x0fa9ax": 0.92,
+                    "ab90s9fa": 0.85,
+                    "aof09sa0": 0.95
+                }
+            ),
+            SimilarVideoGroup(
+                reference_video="f2fafaow",
+                similar_videos={
+                    "jfoeia9e": 0.85,
+                    "ojfs9909": 0.95
+                }
+            )
+        ]
+
+        return
+        videos = self.__db_accessor.get_videos()
 
         compare_cache: dict[str, float] = {}
         similar_group_list: list[SimilarVideoGroup] = []

@@ -3,10 +3,9 @@ from pydantic import BaseModel
 from pydantic.alias_generators import to_camel
 
 
-class VARequest(BaseModel):
-    action: str
-    video_id: Optional[str] = None
-    video_file_path: Optional[str] = None
+class VideoAddRequest(BaseModel):
+    video_id: str
+    video_file_path: str
 
     class Config:
         alias_generator = to_camel

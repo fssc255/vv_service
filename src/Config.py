@@ -13,3 +13,4 @@ class Config:
     PORT = 6590
     VIDEO_LIBRARY = "./video_library"
     LOG_DIRECTORY = "./logs"
+    DEFAULT_SIMILARITY_THRESHOLD = 0.95
