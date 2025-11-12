@@ -56,4 +56,4 @@ class VAService:
         # 2.精化相似组，处理被重复添加的视频，只保留相似度最大的组
         # TODO
 
-        return []
+        return similar_group_list
