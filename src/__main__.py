@@ -1,4 +1,5 @@
-from VideoAnalyzer import VideoAnalyzer
+from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
+from storages.VectorDbAccessor import VectorDbAccessor
 import utils.Logger_example
 import numpy as np
 import utils.KeyframesSampler_example
@@ -16,8 +17,8 @@ from VideoMetadataExtractor import VideoMetadataExtractor
 # utils.Logger_example.example()
 
 TEST_FILE1 = R"/mnt/c/Users/11717/Desktop/temp/sample_videos/00078.mp4"
-TEST_FILE2 = R"/mnt/c/Users/11717/Desktop/temp/sample_videos/00069.mp4"
 TEST_FILE2 = R"/mnt/c/Users/11717/Desktop/temp/sample_videos/00078-R.mp4"
+TEST_FILE2 = R"/mnt/c/Users/11717/Desktop/temp/sample_videos/00069.mp4"
 
 
 class DumbDbAccessor(IDbAccessor):
@@ -57,9 +58,9 @@ class DumbVectorDbAccessor(IVectorDbAccessor):
         raise NotImplementedError
 
 
-va = VideoAnalyzer(
+va = VideoSimilarityAnalyzer(
     dbAccessor=DumbDbAccessor(),
-    vectorDbAccessor=DumbVectorDbAccessor()
+    vectorDbAccessor=DumbVectorDbAccessor(),
 )
 
 print(va.get_similarity("video1", "video2"))

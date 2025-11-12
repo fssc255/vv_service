@@ -8,5 +8,10 @@ def hello_world():
     return "Hello, World!"
 
 
+@app.route("/api/va")
+def video_analyzer():
+    return ""
+
+
 if __name__ == "__main__":
     app.run(debug=True)

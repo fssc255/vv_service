@@ -2,6 +2,8 @@ from PIL import Image
 import numpy as np
 import cv2
 
+from utils.Logger import Logger
+
 
 class IKeyframeSelector:
     def get_frame_position(self, keyframe_index: int, total_frame_count: int) -> int:
@@ -53,6 +55,8 @@ class KeyframesSampler:
         keyframes: list[np.ndarray] = []
         processed_frame_index = 0
 
+        Logger.info(f"开始对{video_file_path}进行关键帧采样")
+
         while len(keyframes) < keyframe_count:
             ret, frame = cap.read()
 
@@ -60,7 +64,7 @@ class KeyframesSampler:
                 break
 
             if processed_frame_index == sampling_frames[sampled_frame_index]:
-                print(f"采样第{sampled_frame_index}个关键帧(视频第{processed_frame_index}帧)")
+                Logger.info(f"采样第{len(keyframes) + 1}个关键帧(视频第{processed_frame_index}帧)")
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 keyframes.append(frame_rgb)
                 sampled_frame_index += 1
@@ -99,6 +103,8 @@ class KeyframesSampler:
         keyframes: list[np.ndarray] = []
         processed_frame_index = 0
 
+        Logger.info(f"开始对{video_file_path}进行关键帧采样")
+        
         while True:
             ret, frame = cap.read()
 
@@ -106,7 +112,7 @@ class KeyframesSampler:
                 break
 
             if processed_frame_index % frame_interval == 0:
-                print(f"采样第{len(keyframes) + 1}个关键帧(视频第{processed_frame_index}帧)")
+                Logger.info(f"采样第{len(keyframes) + 1}个关键帧(视频第{processed_frame_index}帧)")
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 keyframes.append(frame_rgb)
 

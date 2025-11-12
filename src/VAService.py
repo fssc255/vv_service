@@ -1,13 +1,21 @@
 from dataclasses import dataclass
-from VideoAnalyzer import VideoAnalyzer
+from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
 from storages.DbAccessor import DbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 
 
-class SimilarVideosSearcher:
-    @staticmethod
-    def find_similar_videos(videoAnalyzer: VideoAnalyzer, threshold: float) -> list[SimilarVideoGroup]:
+class VAService:
+    def __init__(self) -> None:
+        self.__videoSimilarityAnalyzer = VideoSimilarityAnalyzer()
+
+    def add_video(self, video_id: str, video_file_path: str) -> bool:
+        pass
+
+    def delete_video(self, video: str, video_file_path: str) -> bool:
+        pass
+
+    def find_similar_videos(self, threshold: float) -> list[SimilarVideoGroup]:
         with DbAccessor() as db_accessor:
             videos = db_accessor.get_videos()
 
@@ -35,7 +43,7 @@ class SimilarVideosSearcher:
                 if cache_id in compare_cache:
                     similarity = compare_cache[cache_id]
                 else:
-                    similarity = videoAnalyzer.get_similarity(first_video.id, second_video.id)
+                    similarity = self.__videoSimilarityAnalyzer.get_similarity(first_video.id, second_video.id)
                     compare_cache[cache_id] = similarity
 
                 # 若相似度达到阈值，加入到相似组

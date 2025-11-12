@@ -47,5 +47,6 @@ class Logger:
         assert Logger.__fp is not None
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        Logger.__fp.write(f"[{current_time}] [{category}] {log_message}\n")
-        print(log_message)
+        message = f"[{current_time}] [{category}] {log_message}"
+        Logger.__fp.write(message + "\n")
+        print(message)
