@@ -1,27 +1,19 @@
-from dataclasses import dataclass
+from typing import Optional
+from pydantic import BaseModel
+from pydantic.alias_generators import to_camel
 
 
-@dataclass
-class VideoMetadata:
-    width: int | None
-    height: int | None
-    fps: float | None
-    duration: int | None
+class VideoMetadata(BaseModel):
+    width: Optional[int]
+    height: Optional[int]
+    fps: Optional[float]
+    duration: Optional[int]
     file_type: str
     file_size: int
     create_time: int
     modify_time: int
     md5: str
 
-    def to_dict(self) -> dict:
-        return {
-            "width": self.width,
-            "height": self.height,
-            "fps": self.fps,
-            "duration": self.duration,
-            "file_type": self.file_type,
-            "file_size": self.file_size,
-            "create_time": self.create_time,
-            "modify_time": self.modify_time,
-            "md5": self.md5,
-        }
+    class Config:
+        alias_generator = to_camel
+        populate_by_name = True

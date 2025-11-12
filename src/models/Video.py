@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
+from pydantic.alias_generators import to_camel
 
 
-@dataclass
-class Video:
+class Video(BaseModel):
     id: str
     video_url: str
     cover_url: str
@@ -12,3 +12,7 @@ class Video:
     content: str
     record_time: str
     upload_time: str
+
+    class Config:
+        alias_generator = to_camel
+        populate_by_name = True

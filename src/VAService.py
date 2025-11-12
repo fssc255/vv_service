@@ -10,10 +10,10 @@ class VAService:
         self.__videoSimilarityAnalyzer = VideoSimilarityAnalyzer()
 
     def add_video(self, video_id: str, video_file_path: str) -> bool:
-        pass
+        raise NotImplementedError
 
     def delete_video(self, video: str, video_file_path: str) -> bool:
-        pass
+        raise NotImplementedError
 
     def find_similar_videos(self, threshold: float) -> list[SimilarVideoGroup]:
         with DbAccessor() as db_accessor:
