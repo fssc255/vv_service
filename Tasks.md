@@ -23,6 +23,18 @@ Body:
 | action    | 指定任务类型                                                 |
 | threshold | 相似度阈值，指定两个视频应达到什么样的相似度才会被视为“相似” |
 
+Curl 请求示例
+
+```bash
+curl -X POST http://127.0.0.1:6590/api/va \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "VA:FIND_SIMILAR_VIDEOS",
+    "threshold": 0.9
+  }' \
+  -w "\n响应状态码: %{http_code}\n"
+```
+
 **RESPONSE**
 
 ```json
@@ -79,6 +91,19 @@ data 为一个数组，表示相似的视频组。
 | videoId       | 视频 id                        |
 | videoFilePath | 视频文件上传到本地后的完整路径 |
 
+Curl 请求示例
+
+```bash
+curl -X POST http://127.0.0.1:6590/api/va \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "VA:ADD_VIDEO",
+    "videoId": "f2fafaow",
+    "videoFilePath": "/full/qualified/path/to/video/file.mp4"
+  }' \
+  -w "\n响应状态码: %{http_code}\n"
+```
+
 **RESPONSE**
 
 ```json
@@ -133,6 +158,18 @@ Body:
 | ------- | ------------ |
 | action  | 指定任务类型 |
 | videoId | 视频 id      |
+
+Curl 请求示例
+
+```bash
+curl -X POST http://127.0.0.1:6590/api/va \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "VA:REMOVE_VIDEO",
+    "videoId": "abc114514"
+  }' \
+  -w "\n响应状态码: %{http_code}\n"
+```
 
 **RESPONSE**
 
