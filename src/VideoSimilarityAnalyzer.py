@@ -71,7 +71,8 @@ class VideoSimilarityAnalyzer:
             video2_metadata.duration,
         ))
 
-        return sum(np.vectorize(lambda x, y: min(x, y) / max(x, y))(data1, data2) * (0.01, 0.01, 0.18, 0.8))
+        comp_similarity = sum(np.vectorize(lambda x, y: min(x, y) / max(x, y))(data1, data2) * (0.01, 0.01, 0.18, 0.8))
+        return max(comp_similarity, 0)
 
     def __calculate_semantics_similarity(self,  video1_id: str, video2_id: str) -> float:
         def get_or_add_video_feature_vector(video_id: str) -> list[np.ndarray] | None:
@@ -84,7 +85,7 @@ class VideoSimilarityAnalyzer:
 
         video2_feature_vector = get_or_add_video_feature_vector(video2_id)
         if video2_feature_vector is None:
-            Logger.error(f"无法获取视频的特征向量 (VideoId={video1_id})")
+            Logger.error(f"无法获取视频的特征向量 (VideoId={video2_id})")
             return -1
 
         return self.__similarity_calculator.calculate(video1_feature_vector, video2_feature_vector)
