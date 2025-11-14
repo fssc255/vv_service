@@ -6,7 +6,8 @@ import hashlib
 
 
 class VideoMetadataExtractor:
-    def get_metadata(self, video_file_path: str) -> VideoMetadata | None:
+    @staticmethod
+    def get_metadata(video_file_path: str) -> VideoMetadata:
         def parse_int(value: Any) -> int | None:
             try:
                 return int(value)
@@ -20,9 +21,12 @@ class VideoMetadataExtractor:
                 return None
 
         if not os.path.exists(video_file_path):
-            return None
+            raise FileNotFoundError(video_file_path)
 
-        metadata = {}
+        metadata = {
+            "id": -1,
+            "video_id": "",
+        }
         media_info = MediaInfo.parse(video_file_path)
 
         file_stat = os.stat(video_file_path)

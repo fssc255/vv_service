@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Query
 from typing import Union
-from models.request_args import VideoAddRequest
-from models.response_args import VideoAddResponse, VideoRemoveResponse, SimilarVideosResponse, ApiResponse
+from models.requests.VideoAddRequest import VideoAddRequest
+from models.responses.ApiResponse import ApiResponse
+from models.responses.SimilarVideosResponse import SimilarVideosResponse
+from models.responses.VideoAddResponse import VideoAddResponse
+from models.responses.VideoRemoveResponse import VideoRemoveResponse
 from VAService import VAService
 from Config import Config
 from utils.Logger import Logger

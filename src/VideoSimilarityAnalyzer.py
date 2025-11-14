@@ -1,9 +1,7 @@
 import numpy as np
 from storages.IDbAccessor import IDbAccessor
 from storages.IVectorDbAccessor import IVectorDbAccessor
-from models.VideoMetadata import VideoMetadata
 from utils.Logger import Logger
-from ImageFeatureExtractor import ImageFeatureExtractor
 from VectorsSimilarityCalculator import VectorsSimilarityCalculator
 
 

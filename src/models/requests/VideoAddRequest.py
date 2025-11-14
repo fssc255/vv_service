@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel
 from pydantic.alias_generators import to_camel
 

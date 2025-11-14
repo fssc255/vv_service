@@ -24,23 +24,20 @@ class ImageFeatureExtractor:
             )
         ])
 
-    def get_feature_vector(self, image: np.ndarray) -> np.ndarray | None:
+    def get_feature_vector(self, image: np.ndarray) -> np.ndarray:
         """
         将RGB像素转换为特征向量
 
         参数:
             image: ndarray形式的RGB图像
         返回:
-            图像的特征向量，失败则返回None
+            图像的特征向量
         """
-        try:
-            # 在第0维增加一个批次维度（模型要求输入形状为[batch_size, C, H, W]）
-            img_tensor = self.__image_transform(image).unsqueeze(0)  # type:ignore
+        # 在第0维增加一个批次维度（模型要求输入形状为[batch_size, C, H, W]）
+        img_tensor = self.__image_transform(image).unsqueeze(0)  # type:ignore
 
-            with torch.no_grad():
-                # 输入预处理后的张量，得到特征输出（形状为[1, 512, 1, 1]）
-                vector = self.__feature_extractor(img_tensor).squeeze().numpy()
+        with torch.no_grad():
+            # 输入预处理后的张量，得到特征输出（形状为[1, 512, 1, 1]）
+            vector = self.__feature_extractor(img_tensor).squeeze().numpy()
 
-            return vector
-        except Exception as e:
-            return None
+        return vector

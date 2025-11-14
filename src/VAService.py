@@ -1,56 +1,70 @@
 from dataclasses import dataclass
+import os
+from typing import Optional
 from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
 from models.VideoMetadata import VideoMetadata
 from storages.DbAccessor import DbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 from storages.IDbAccessor import IDbAccessor
+from storages.IVectorDbAccessor import IVectorDbAccessor
+from storages.memory.dumbs import DumbDbAccessor, DumbVectorDbAccessor
+from VideoMetadataExtractor import VideoMetadataExtractor
+from ImageFeatureExtractor import ImageFeatureExtractor
+from utils.KeyframesSampler import KeyframesSampler
+from utils.Logger import Logger
 
 
 class VAService:
     def __init__(self) -> None:
-        self.__db_accessor: IDbAccessor = None
-        self.__videoSimilarityAnalyzer = VideoSimilarityAnalyzer(
-            dbAccessor=None,
-            vectorDbAccessor=None,
-        )
+        db_accessor = DumbDbAccessor()
+        vector_db_accessor = DumbVectorDbAccessor()
 
-    def add_video(self, video_id: str, video_file_path: str) -> VideoMetadata:
-        return VideoMetadata(
-            width=1920,
-            height=1080,
-            fps=30.0,
-            duration=120,
-            file_type="mp4",
-            file_size=10485760,
-            create_time=1698765432,
-            modify_time=1698765432,
-            md5="5d41402abc4b2a76b9719d911017c592",
-        )
+        self.__image_feature_extractor = ImageFeatureExtractor()
+        self.__db_accessor: IDbAccessor = db_accessor
+        self.__vector_db_accessor: IVectorDbAccessor = vector_db_accessor
+
+    def add_video(self, video_id: str, video_file_path: str) -> Optional[VideoMetadata]:
+        if not os.path.exists(video_file_path) or os.path.isdir(video_file_path):
+            raise FileNotFoundError(video_file_path)
+
+        # 1.获取视频元数据
+        try:
+            video_metadata = VideoMetadataExtractor.get_metadata(video_file_path)
+        except Exception as e:
+            Logger.error(f"无法获取视频的元数据 (File=`{video_file_path}`, Error={e})")
+            return None
+
+        # 2.计算特征向量并添加到向量数据库
+        try:
+            keyframes = KeyframesSampler.sample(video_file_path, 10)
+        except Exception as e:
+            Logger.error(f"无法提取视频的关键帧 (File=`{video_file_path}`, Error={e})")
+            return None
+
+        try:
+            feature_vectors = [self.__image_feature_extractor.get_feature_vector(x) for x in keyframes]
+            self.__vector_db_accessor.add(video_id, feature_vectors)
+        except Exception as e:
+            Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
+            return None
+
+        return video_metadata
 
     def delete_video(self, video_id: str) -> bool:
-        return True
+        try:
+            self.__vector_db_accessor.delete(video_id)
+            return True
+        except Exception as e:
+            Logger.error(f"从向量数据库中删除 {video_id} 时发生错误 (Error={e})")
+            return False
 
     def find_similar_videos(self, threshold: float) -> list[SimilarVideoGroup]:
-        return [
-            SimilarVideoGroup(
-                reference_video="aow05202",
-                similar_videos={
-                    "0x0fa9ax": 0.92,
-                    "ab90s9fa": 0.85,
-                    "aof09sa0": 0.95
-                }
-            ),
-            SimilarVideoGroup(
-                reference_video="f2fafaow",
-                similar_videos={
-                    "jfoeia9e": 0.85,
-                    "ojfs9909": 0.95
-                }
-            )
-        ]
+        video_similarity_analyzer = VideoSimilarityAnalyzer(
+            dbAccessor=self.__db_accessor,
+            vectorDbAccessor=self.__vector_db_accessor,
+        )
 
-        return
         videos = self.__db_accessor.get_videos()
 
         compare_cache: dict[str, float] = {}
@@ -77,7 +91,7 @@ class VAService:
                 if cache_id in compare_cache:
                     similarity = compare_cache[cache_id]
                 else:
-                    similarity = self.__videoSimilarityAnalyzer.get_similarity(first_video.id, second_video.id)
+                    similarity = video_similarity_analyzer.get_similarity(first_video.id, second_video.id)
                     compare_cache[cache_id] = similarity
 
                 # 若相似度达到阈值，加入到相似组

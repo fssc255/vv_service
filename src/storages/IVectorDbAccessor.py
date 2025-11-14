@@ -14,7 +14,7 @@ class IVectorDbAccessor:
         """
         raise NotImplementedError
 
-    def add(self, video_id: str, vector: list[np.ndarray]) -> None:
+    def add(self, video_id: str, vectors: list[np.ndarray]) -> None:
         """
         为指定视频ID添加特征向量
 

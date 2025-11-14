@@ -117,6 +117,8 @@ curl -X POST http://127.0.0.1:6590/api/va/videos \
     "success": true,
     "message": "",
     "data": {
+        "id": -1,
+        "videoId": "",
         "width": 1920,
         "height": 1080,
         "fps": 30.0,
@@ -132,6 +134,8 @@ curl -X POST http://127.0.0.1:6590/api/va/videos \
 
 | 字段       | 类型          | 说明                                              |
 | ---------- | ------------- | ------------------------------------------------- |
+| id         | int           | 记录 id，总是为-1                                 |
+| videoId    | str           | 视频的 Id，总是为空串                             |
 | width      | int \| null   | 视频画面宽度                                      |
 | height     | int \| null   | 视频画面高度                                      |
 | fps        | float \| null | 视频帧率                                          |

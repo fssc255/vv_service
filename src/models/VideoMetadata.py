@@ -4,6 +4,8 @@ from pydantic.alias_generators import to_camel
 
 
 class VideoMetadata(BaseModel):
+    id: int
+    video_id: str
     width: Optional[int]
     height: Optional[int]
     fps: Optional[float]
