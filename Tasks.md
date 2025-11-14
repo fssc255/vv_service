@@ -1,186 +1,4 @@
-## 1.API 定义
-
-### （1）请求执行相似视频查找
-
-**REQUEST**
-
-| 属性     | 值                           |
-| -------- | ---------------------------- |
-| Endpoint | http://127.0.0.1:6590/api/va |
-| Method   | POST                         |
-
-Body:
-
-```json
-{
-    "action": "VA:FIND_SIMILAR_VIDEOS",
-    "threshold": 0.9
-}
-```
-
-| 参数      | 说明                                                         |
-| --------- | ------------------------------------------------------------ |
-| action    | 指定任务类型                                                 |
-| threshold | 相似度阈值，指定两个视频应达到什么样的相似度才会被视为“相似” |
-
-Curl 请求示例
-
-```bash
-curl -X POST http://127.0.0.1:6590/api/va \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "VA:FIND_SIMILAR_VIDEOS",
-    "threshold": 0.9
-  }' \
-  -w "\n响应状态码: %{http_code}\n"
-```
-
-**RESPONSE**
-
-```json
-{
-    "success": true,
-    "message": "",
-    "data": [
-        {
-            "referenceVideo": "aow05202",
-            "similarVideos": {
-                "0x0fa9ax": 0.92,
-                "ab90s9fa": 0.85,
-                "aof09sa0": 0.95
-            }
-        },
-        {
-            "referenceVideo": "f2fafaow",
-            "similarVideos": {
-                "jfoeia9e": 0.85,
-                "ojfs9909": 0.95
-            }
-        }
-    ]
-}
-```
-
-data 为一个数组，表示相似的视频组。
-
-| 字段           | 类型        | 说明                                                                |
-| -------------- | ----------- | ------------------------------------------------------------------- |
-| referenceVideo | str         | 参考视频的 id                                                       |
-| similarVideos  | {str:float} | 一个视频 id -> 相似度的字典，表示对应视频和 referenceVideo 的相似度 |
-
-### （2）添加视频
-
-**REQUEST**
-
-| 属性     | 值                           |
-| -------- | ---------------------------- |
-| Endpoint | http://127.0.0.1:6590/api/va |
-| Method   | POST                         |
-
-```json
-{
-    "action": "VA:ADD_VIDEO",
-    "videoId": "f2fafaow",
-    "videoFilePath": "/full/qualified/path/to/video/file.mp4"
-}
-```
-
-| 参数          | 说明                           |
-| ------------- | ------------------------------ |
-| action        | 指定任务类型                   |
-| videoId       | 视频 id                        |
-| videoFilePath | 视频文件上传到本地后的完整路径 |
-
-Curl 请求示例
-
-```bash
-curl -X POST http://127.0.0.1:6590/api/va \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "VA:ADD_VIDEO",
-    "videoId": "f2fafaow",
-    "videoFilePath": "/full/qualified/path/to/video/file.mp4"
-  }' \
-  -w "\n响应状态码: %{http_code}\n"
-```
-
-**RESPONSE**
-
-```json
-{
-    "success": true,
-    "message": "",
-    "data": {
-        "width": 1920,
-        "height": 1080,
-        "fps": 30.0,
-        "duration": 120,
-        "fileType": "mp4",
-        "fileSize": 10485760,
-        "createTime": 1698765432,
-        "modifyTime": 1698765432,
-        "md5": "5d41402abc4b2a76b9719d911017c592"
-    }
-}
-```
-
-| 字段       | 类型          | 说明                                              |
-| ---------- | ------------- | ------------------------------------------------- |
-| width      | int \| null   | 视频画面宽度                                      |
-| height     | int \| null   | 视频画面高度                                      |
-| fps        | float \| null | 视频帧率                                          |
-| duration   | int \| null   | 视频时长，单位秒                                  |
-| fileType   | string        | 视频文件类型，确保全小写                          |
-| fileSize   | int           | 视频文件大小，单位为字节                          |
-| createTime | int           | 视频文件的创建时间，unix 时间戳（秒单位，秒精度） |
-| modifyTime | int           | 视频文件的修改时间，unix 时间戳（秒单位，秒精度） |
-| md5        | string        | 视频文件的 md5，全小写                            |
-
-### （3）删除视频
-
-**REQUEST**
-
-| 属性     | 值                           |
-| -------- | ---------------------------- |
-| Endpoint | http://127.0.0.1:6590/api/va |
-| Method   | POST                         |
-
-Body:
-
-```json
-{
-    "action": "VA:REMOVE_VIDEO",
-    "videoId": "abc114514"
-}
-```
-
-| 参数    | 说明         |
-| ------- | ------------ |
-| action  | 指定任务类型 |
-| videoId | 视频 id      |
-
-Curl 请求示例
-
-```bash
-curl -X POST http://127.0.0.1:6590/api/va \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "VA:REMOVE_VIDEO",
-    "videoId": "abc114514"
-  }' \
-  -w "\n响应状态码: %{http_code}\n"
-```
-
-**RESPONSE**
-
-```json
-{
-    "success": true,
-    "message": ""
-}
-```
-
-## 2.工作分配
+## 工作分配
 
 ### 本科组
 
@@ -228,7 +46,7 @@ class IVideoAnalyzer:
         pass
 ```
 
-（2）实现本文定义的 API
+（2）实现 [README.md](./README.md) 中定义的 API
 
 ## 工作流图
 
@@ -265,7 +83,7 @@ participant DB as 数据库
     Frontend->>Backend: 上传视频请求
     Backend->>DB: 存储视频文件与基本信息
     DB->>Backend: 存储确认
-    Backend->>Algorithm: POST /api/va<br/>{action: "VA:ADD_VIDEO", videoId: "xxx", videoFilePath: "yyy"}
+    Backend->>Algorithm: POST /api/va<br/>{action: videoId: "xxx", videoFilePath: "yyy"}
 
     Algorithm->>DB: 计算并存储特征向量
     Algorithm->>Backend: 返回视频元数据
