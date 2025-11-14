@@ -26,28 +26,47 @@ class VAService:
 
     def add_video(self, video_id: str, video_file_path: str) -> Optional[VideoMetadata]:
         if not os.path.exists(video_file_path) or os.path.isdir(video_file_path):
+            Logger.info(f"视频文件不存在 (File={video_file_path})")
             raise FileNotFoundError(video_file_path)
 
         # 1.获取视频元数据
         try:
+            Logger.info(f"获取视频元数据 (File={video_file_path})")
             video_metadata = VideoMetadataExtractor.get_metadata(video_file_path)
+            video_metadata.video_id = video_id
         except Exception as e:
             Logger.error(f"无法获取视频的元数据 (File=`{video_file_path}`, Error={e})")
             return None
 
-        # 2.计算特征向量并添加到向量数据库
+        # 2.采样关键帧，计算特征向量并添加到向量数据库
         try:
+            Logger.info(f"采样视频关键帧 (File={video_file_path})")
             keyframes = KeyframesSampler.sample(video_file_path, 10)
         except Exception as e:
             Logger.error(f"无法提取视频的关键帧 (File=`{video_file_path}`, Error={e})")
             return None
 
         try:
+            Logger.info(f"计算视频关键帧特征向量 (File={video_file_path})")
             feature_vectors = [self.__image_feature_extractor.get_feature_vector(x) for x in keyframes]
             self.__vector_db_accessor.add(video_id, feature_vectors)
         except Exception as e:
             Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
             return None
+
+        # TODO: 记得删，实际数据添加靠上级后端
+        self.__db_accessor.add_video(Video(
+            id=video_metadata.video_id,
+            video_url="",
+            cover_url="",
+            size="",
+            name="",
+            uploader="",
+            content="",
+            record_time="",
+            upload_time=""
+        ))
+        self.__db_accessor.add_video_metadata(video_metadata)
 
         return video_metadata
 
@@ -68,10 +87,17 @@ class VAService:
         videos = self.__db_accessor.get_videos()
 
         compare_cache: dict[str, float] = {}
+        processed_video_id_set: set[str] = set()
         similar_group_list: list[SimilarVideoGroup] = []
 
         # 1.筛选相似组
         for reference_video in videos:
+            # 跳过已处理
+            if reference_video.id in processed_video_id_set:
+                continue
+
+            processed_video_id_set.add(reference_video.id)
+
             similar_group = SimilarVideoGroup(
                 reference_video=reference_video.id,
                 similar_videos={}
@@ -79,6 +105,10 @@ class VAService:
             for test_video in videos:
                 # 跳过自比较
                 if reference_video.id == test_video.id:
+                    continue
+
+                # 跳过已处理
+                if test_video.id in processed_video_id_set:
                     continue
 
                 if reference_video.id < test_video.id:
@@ -97,6 +127,7 @@ class VAService:
                 # 若相似度达到阈值，加入到相似组
                 if similarity >= threshold:
                     similar_group.similar_videos[test_video.id] = similarity
+                    processed_video_id_set.add(test_video.id)
 
             if len(similar_group.similar_videos) > 0:
                 similar_group_list.append(similar_group)

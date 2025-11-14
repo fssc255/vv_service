@@ -18,22 +18,22 @@ def unhandled_error(e: Exception):
     Logger.error(f"{e}")
     return ApiResponse(
         success=False,
-        message=f"Unhandled Error: {e}",
+        message=f"Unhandled Error: {type(e)}{e}",
     )
 
 
 @app.get("/")
 async def hello_world():
-    return "Hello, World!"
+    return "hello world"
 
 
 @app.post("/api/va/videos", response_model=Union[VideoAddResponse, ApiResponse])
 async def add_video(body: VideoAddRequest):
-    Logger.info(f"Adding video {body.video_id} (file path={body.video_file_path})")
+    Logger.info(f"添加视频 (VideoId={body.video_id}, File={body.video_file_path})")
     try:
         video_metadata = va_service.add_video(body.video_id, body.video_file_path)
         if video_metadata is None:
-            raise Exception("Cannot get video metadata")
+            raise Exception("无法获取视频元数据")
 
         return VideoAddResponse(
             success=True,
@@ -49,7 +49,7 @@ async def similar_videos(
     threshold: float = Query(default=Config.DEFAULT_SIMILARITY_THRESHOLD, ge=0.0, le=1.0)
 ):
     try:
-        Logger.info(f"Finding similar videos (threshold={threshold})")
+        Logger.info(f"查找相似视频中 (threshold={threshold})")
         similar_videos = va_service.find_similar_videos(threshold)
 
         return SimilarVideosResponse(
@@ -64,7 +64,7 @@ async def similar_videos(
 @app.delete("/api/va/videos/{video_id}", response_model=Union[VideoRemoveResponse, ApiResponse])
 async def delete_video(video_id: str):
     try:
-        Logger.info(f"Deleting video {video_id}")
+        Logger.info(f"删除视频 (VideoId={video_id})")
         deleted = va_service.delete_video(video_id)
 
         return VideoRemoveResponse(

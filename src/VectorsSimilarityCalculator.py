@@ -17,6 +17,9 @@ class VectorsSimilarityCalculator:
         if len(first_vectors) != len(second_vectors):
             return 0
 
+        if len(first_vectors) == 0:
+            return 0
+
         frac = 1 / len(first_vectors)
 
         # 视频1的关键帧匹配视频2的关键帧

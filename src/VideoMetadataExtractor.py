@@ -41,11 +41,12 @@ class VideoMetadataExtractor:
             if track_type == "general":
                 metadata["file_type"] = track.format.lower()
             if track_type == "video":
+                duration = parse_float(track.duration)
                 metadata |= {
                     "width": parse_int(track.width),
                     "height": parse_int(track.height),
                     "fps": parse_float(track.frame_rate),
-                    "duration": parse_float(track.duration / 1000),
+                    "duration": int(duration / 1000) if duration is not None else -1,
                 }
                 break
 

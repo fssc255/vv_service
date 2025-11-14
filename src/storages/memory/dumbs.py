@@ -13,6 +13,12 @@ class DumbDbAccessor(IDbAccessor):
         self.__videos: list[Video] = []
         self.__video_metadata: list[VideoMetadata] = []
 
+    def add_video(self, video: Video) -> None:
+        self.__videos.append(video)
+
+    def add_video_metadata(self, video_metadata: VideoMetadata) -> None:
+        self.__video_metadata.append(video_metadata)
+
     def get_videos(self) -> list[Video]:
         return self.__videos
 
