@@ -10,6 +10,7 @@ class VideoMetadata(BaseModel):
     height: Optional[int]
     fps: Optional[float]
     duration: Optional[int]
+    file_path: str
     file_type: str
     file_size: int
     create_time: int

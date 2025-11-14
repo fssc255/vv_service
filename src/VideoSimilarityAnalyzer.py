@@ -7,9 +7,9 @@ from VectorsSimilarityCalculator import VectorsSimilarityCalculator
 
 class VideoSimilarityAnalyzer:
     def __init__(self, dbAccessor: IDbAccessor, vectorDbAccessor: IVectorDbAccessor) -> None:
-        self.__dbAccessor = dbAccessor
-        self.__vectorDbAccessor = vectorDbAccessor
-        self.__similarityCalculator = VectorsSimilarityCalculator()
+        self.__db_accessor = dbAccessor
+        self.__vector_db_accessor = vectorDbAccessor
+        self.__similarity_calculator = VectorsSimilarityCalculator()
 
     def get_similarity(self, video1_id: str, video2_id: str) -> float:
         """
@@ -45,12 +45,12 @@ class VideoSimilarityAnalyzer:
         return comprehensive_similarity
 
     def __calculate_metadata_similarity(self, video1_id: str, video2_id: str) -> float:
-        video1_metadata = self.__dbAccessor.get_video_metadata(video1_id)
+        video1_metadata = self.__db_accessor.get_video_metadata(video1_id)
         if video1_metadata is None:
             Logger.error(f"无法获取Id为{video1_id}的视频的元数据")
             return 0
 
-        video2_metadata = self.__dbAccessor.get_video_metadata(video2_id)
+        video2_metadata = self.__db_accessor.get_video_metadata(video2_id)
         if video2_metadata is None:
             Logger.error(f"无法获取Id为{video2_id}的视频的元数据")
             return 0
@@ -75,16 +75,16 @@ class VideoSimilarityAnalyzer:
 
     def __calculate_semantics_similarity(self,  video1_id: str, video2_id: str) -> float:
         def get_or_add_video_feature_vector(video_id: str) -> list[np.ndarray] | None:
-            return self.__vectorDbAccessor.get(video_id)
+            return self.__vector_db_accessor.get(video_id)
 
         video1_feature_vector = get_or_add_video_feature_vector(video1_id)
         if video1_feature_vector is None:
-            Logger.error(f"无法获取Id为{video1_id}的视频的特征向量")
+            Logger.error(f"无法获取视频的特征向量 (VideoId={video1_id})")
             return -1
 
         video2_feature_vector = get_or_add_video_feature_vector(video2_id)
         if video2_feature_vector is None:
-            Logger.error(f"无法获取Id为{video2_id}的视频的特征向量")
+            Logger.error(f"无法获取视频的特征向量 (VideoId={video1_id})")
             return -1
 
-        return self.__similarityCalculator.calculate(video1_feature_vector, video2_feature_vector)
+        return self.__similarity_calculator.calculate(video1_feature_vector, video2_feature_vector)

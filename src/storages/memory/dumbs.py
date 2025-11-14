@@ -2,9 +2,6 @@ from models.Video import Video
 from models.VideoMetadata import VideoMetadata
 from storages.IVectorDbAccessor import IVectorDbAccessor
 from storages.IDbAccessor import IDbAccessor
-from ImageFeatureExtractor import ImageFeatureExtractor
-from utils.KeyframesSampler import KeyframesSampler
-from VideoMetadataExtractor import VideoMetadataExtractor
 import numpy as np
 
 
