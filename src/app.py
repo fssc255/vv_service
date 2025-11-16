@@ -37,6 +37,9 @@ async def lifespan(app: FastAPI):
         )
         Logger.info("VAService 初始化成功")
         yield
+    except Exception as e:
+        Logger.error(f"初始化 VAService 失败 (Error={e})")
+        raise
     finally:
         # 关闭时清理资源
         Logger.info("正在关闭数据库连接...")
