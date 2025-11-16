@@ -62,13 +62,13 @@ class ImageFeatureExtractor:
                 pil_image = image
             
             # 预处理
-            image_tensor = self.__preprocess(pil_image).unsqueeze(0).to(self.device)
+            image_tensor = self.__preprocess(pil_image).unsqueeze(0).to(self.device) # type:ignore
             if self.device == "cuda":
                 image_tensor = image_tensor.half()
             
             # 提取特征向量
             with torch.no_grad():
-                vector = self.__model.encode_image(image_tensor)
+                vector = self.__model.encode_image(image_tensor) # type:ignore
                 # 归一化
                 vector = vector / vector.norm(dim=-1, keepdim=True)
                 vector = vector.cpu().numpy()[0]
