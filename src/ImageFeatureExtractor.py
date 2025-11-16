@@ -1,28 +1,49 @@
-from torchvision.models import ResNet18_Weights
-import torchvision.transforms as transforms
-import torchvision.models as models
 import torch
 import numpy as np
+import open_clip
+from PIL import Image
+from utils.Logger import Logger
 
 
 class ImageFeatureExtractor:
-    def __init__(self) -> None:
-        model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
-
-        self.__feature_extractor = torch.nn.Sequential(*list(model.children())[:-1])
-        self.__feature_extractor.eval()
-        for param in self.__feature_extractor.parameters():
-            param.requires_grad = False
-
-        self.__image_transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225]
+    """使用OpenCLIP模型提取图像特征"""
+    
+    def __init__(self, model_name: str = "ViT-B-32", pretrained: str = "laion2b_s34b_b79k") -> None:
+        """
+        初始化OpenCLIP模型
+        
+        Args:
+            model_name: 模型名称，默认使用EVA02-E-14-plus
+            pretrained: 预训练权重
+        """
+        try:
+            Logger.info(f"正在加载OpenCLIP模型: {model_name}")
+            
+            # 检测设备
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            Logger.info(f"使用设备: {self.device}")
+            
+            # 加载模型和预处理器
+            model_result = open_clip.create_model_and_transforms(
+                model_name,
+                pretrained=pretrained,
+                device=self.device
             )
-        ])
+            self.__model = model_result[0]
+            self.__preprocess = model_result[2]
+            
+            # 设置为评估模式
+            self.__model.eval()
+            
+            # GPU模式下启用半精度以减少显存占用
+            if self.device == "cuda":
+                self.__model.half()
+            
+            Logger.info(f"OpenCLIP模型加载成功")
+            
+        except Exception as e:
+            Logger.error(f"加载OpenCLIP模型失败: {e}")
+            raise
 
     def get_feature_vector(self, image: np.ndarray) -> np.ndarray:
         """
@@ -31,13 +52,29 @@ class ImageFeatureExtractor:
         参数:
             image: ndarray形式的RGB图像
         返回:
-            图像的特征向量
+            图像的特征向量 (1024维)
         """
-        # 在第0维增加一个批次维度（模型要求输入形状为[batch_size, C, H, W]）
-        img_tensor = self.__image_transform(image).unsqueeze(0)  # type:ignore
-
-        with torch.no_grad():
-            # 输入预处理后的张量，得到特征输出（形状为[1, 512, 1, 1]）
-            vector = self.__feature_extractor(img_tensor).squeeze().numpy()
-
-        return vector
+        try:
+            # 转换为PIL Image
+            if isinstance(image, np.ndarray):
+                pil_image = Image.fromarray(image.astype('uint8'), 'RGB')
+            else:
+                pil_image = image
+            
+            # 预处理
+            image_tensor = self.__preprocess(pil_image).unsqueeze(0).to(self.device)
+            if self.device == "cuda":
+                image_tensor = image_tensor.half()
+            
+            # 提取特征向量
+            with torch.no_grad():
+                vector = self.__model.encode_image(image_tensor)
+                # 归一化
+                vector = vector / vector.norm(dim=-1, keepdim=True)
+                vector = vector.cpu().numpy()[0]
+            
+            return vector
+            
+        except Exception as e:
+            Logger.error(f"提取图像特征失败: {e}")
+            raise

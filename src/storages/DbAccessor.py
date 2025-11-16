@@ -77,10 +77,48 @@ class DbAccessor(IDbAccessor):
                 modify_time=result["modify_time"],
                 md5=result["md5"],
             )
+            video_metadata.video_id = video_id
             return video_metadata
         except Exception as e:
             Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
             return None
+        finally:
+            cursor.close()
+
+    def add_video_metadata(self, metadata: VideoMetadata) -> bool:
+        """添加视频元数据到数据库"""
+        query = """
+        INSERT INTO video_metadata (video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            width=VALUES(width), height=VALUES(height), fps=VALUES(fps),
+            duration=VALUES(duration), file_type=VALUES(file_type), file_size=VALUES(file_size),
+            create_time=VALUES(create_time), modify_time=VALUES(modify_time), md5=VALUES(md5)
+        """
+
+        conn = self.__get_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute(query, (
+                metadata.video_id,
+                metadata.width,
+                metadata.height,
+                metadata.fps,
+                metadata.duration,
+                metadata.file_type,
+                metadata.file_size,
+                metadata.create_time,
+                metadata.modify_time,
+                metadata.md5
+            ))
+            conn.commit()
+            Logger.info(f"添加视频元数据成功 (VideoId={metadata.video_id})")
+            return True
+        except Exception as e:
+            Logger.error(f"添加视频元数据失败: {e}")
+            conn.rollback()
+            return False
         finally:
             cursor.close()
 

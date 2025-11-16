@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Query
-from typing import Union
+from fastapi import FastAPI, Query, File, UploadFile
+from typing import Union, List
 from models.requests.VideoAddRequest import VideoAddRequest
 from models.responses.ApiResponse import ApiResponse
 from models.responses.SimilarVideosResponse import SimilarVideosResponse
@@ -8,7 +8,10 @@ from models.responses.VideoRemoveResponse import VideoRemoveResponse
 from VAService import VAService
 from Config import Config
 from utils.Logger import Logger
+from PIL import Image
 import uvicorn
+import io
+import base64
 
 app = FastAPI()
 va_service = VAService()
@@ -73,6 +76,53 @@ async def delete_video(video_id: str):
         )
     except Exception as e:
         return unhandled_error(e)
+
+
+# 为Go后端提供的embedding接口
+@app.post("/embed")
+async def embed_image(file: UploadFile = File(...)):
+    """Single image embedding"""
+    try:
+        # 读取上传的图片
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
+        
+        # 转换为RGB
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # 提取特征向量
+        import numpy as np
+        image_array = np.array(image)
+        embedding = va_service.extract_image_embedding(image_array)
+        
+        return {"vector": embedding, "dimension": len(embedding)}
+    except Exception as e:
+        Logger.error(f"提取图像特征失败: {e}")
+        return {"error": str(e)}
+
+
+@app.post("/embed_batch")
+async def embed_images_batch(files: List[UploadFile] = File(...)):
+    """Batch image embedding"""
+    try:
+        embeddings = []
+        for file in files:
+            contents = await file.read()
+            image = Image.open(io.BytesIO(contents))
+            
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            import numpy as np
+            image_array = np.array(image)
+            embedding = va_service.extract_image_embedding(image_array)
+            embeddings.append(embedding)
+        
+        return {"vectors": embeddings, "count": len(embeddings)}
+    except Exception as e:
+        Logger.error(f"批量提取图像特征失败: {e}")
+        return {"error": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=6590)

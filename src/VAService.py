@@ -1,14 +1,13 @@
-from dataclasses import dataclass
 import os
 from typing import Optional
 from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
 from models.VideoMetadata import VideoMetadata
 from storages.DbAccessor import DbAccessor
+from storages.VectorDbAccessor import VectorDbAccessor
 from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 from storages.IDbAccessor import IDbAccessor
 from storages.IVectorDbAccessor import IVectorDbAccessor
-from storages.memory.dumbs import DumbDbAccessor, DumbVectorDbAccessor
 from VideoMetadataExtractor import VideoMetadataExtractor
 from ImageFeatureExtractor import ImageFeatureExtractor
 from utils.KeyframesSampler import KeyframesSampler
@@ -17,12 +16,18 @@ from utils.Logger import Logger
 
 class VAService:
     def __init__(self) -> None:
-        db_accessor = DumbDbAccessor()
-        vector_db_accessor = DumbVectorDbAccessor()
+        # 使用真实的数据库访问器
+        db_accessor = DbAccessor()
+        vector_db_accessor = VectorDbAccessor()
 
         self.__image_feature_extractor = ImageFeatureExtractor()
         self.__db_accessor: IDbAccessor = db_accessor
         self.__vector_db_accessor: IVectorDbAccessor = vector_db_accessor
+
+    def extract_image_embedding(self, image_array) -> list:
+        """提取图像特征向量（供外部API调用）"""
+        vector = self.__image_feature_extractor.get_feature_vector(image_array)
+        return vector.tolist()
 
     def add_video(self, video_id: str, video_file_path: str) -> Optional[VideoMetadata]:
         if not os.path.exists(video_file_path) or os.path.isdir(video_file_path):
@@ -54,19 +59,9 @@ class VAService:
             Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
             return None
 
-        # TODO: 记得删，实际数据添加靠上级后端
-        self.__db_accessor.add_video(Video(
-            id=video_metadata.video_id,
-            video_url="",
-            cover_url="",
-            size="",
-            name="",
-            uploader="",
-            content="",
-            record_time="",
-            upload_time=""
-        ))
-        self.__db_accessor.add_video_metadata(video_metadata)
+        # TODO: 记得删，实际数据添加靠上级后端（已经由Go后端管理）
+        # self.__db_accessor.add_video(...)
+        # self.__db_accessor.add_video_metadata(...)
 
         return video_metadata
 
