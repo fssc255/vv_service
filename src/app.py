@@ -21,11 +21,15 @@ async def lifespan(app: FastAPI):
     # 启动时初始化
     global va_service
     try:
+        Logger.info("正在连接数据库...")
         db_accessor = DbAccessor()
         db_accessor.open()
+        Logger.info("数据库连接成功")
 
+        Logger.info("正在连接向量数据库...")
         vector_db_accessor = VectorDbAccessor()
         vector_db_accessor.open()
+        Logger.info("向量数据库连接成功")
 
         va_service = VAService(
             db_accessor=db_accessor,
@@ -37,6 +41,7 @@ async def lifespan(app: FastAPI):
         # 关闭时清理资源
         Logger.info("正在关闭数据库连接...")
         db_accessor.close()
+        Logger.info("正在关闭向量数据库连接...")
         vector_db_accessor.close()
         Logger.info("资源清理完成")
 
