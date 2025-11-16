@@ -13,7 +13,7 @@ class ImageFeatureExtractor:
         初始化OpenCLIP模型
         
         Args:
-            model_name: 模型名称，默认使用EVA02-E-14-plus
+            model_name: 模型名称
             pretrained: 预训练权重
         """
         try:
