@@ -3,7 +3,7 @@ class Config:
         HOST = "127.0.0.1"
         PORT = 3306
         USER = "root"
-        PASSWORD = "XXXX"  
+        PASSWORD = "123456"  
         DB_NAME = "video_manage_system"
 
     class VectorDatabase:

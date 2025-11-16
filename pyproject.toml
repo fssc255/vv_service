@@ -15,4 +15,5 @@ dependencies = [
     "uvicorn>=0.38.0",
     "chromadb>=0.5.0",
     "open-clip-torch>=2.24.0",
+    "python-multipart>=0.0.20",
 ]

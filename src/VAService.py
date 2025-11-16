@@ -15,11 +15,7 @@ from utils.Logger import Logger
 
 
 class VAService:
-    def __init__(self) -> None:
-        # 使用真实的数据库访问器
-        db_accessor = DbAccessor()
-        vector_db_accessor = VectorDbAccessor()
-
+    def __init__(self, db_accessor: IDbAccessor, vector_db_accessor: IVectorDbAccessor) -> None:
         self.__image_feature_extractor = ImageFeatureExtractor()
         self.__db_accessor: IDbAccessor = db_accessor
         self.__vector_db_accessor: IVectorDbAccessor = vector_db_accessor
@@ -58,10 +54,6 @@ class VAService:
         except Exception as e:
             Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
             return None
-
-        # TODO: 记得删，实际数据添加靠上级后端（已经由Go后端管理）
-        # self.__db_accessor.add_video(...)
-        # self.__db_accessor.add_video_metadata(...)
 
         return video_metadata
 
@@ -128,6 +120,6 @@ class VAService:
                 similar_group_list.append(similar_group)
 
         # 2.精化相似组，处理被重复添加的视频，只保留相似度最大的组
-        # TODO
+        # 这一步没必要了，但是留着作为优化提示
 
         return similar_group_list

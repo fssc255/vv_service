@@ -11,17 +11,32 @@ import mysql.connector
 
 class DbAccessor(IDbAccessor):
     def __init__(self) -> None:
-        self.__conn:  MySQLConnectionAbstract | PooledMySQLConnection | None = None
+        self.__conn: PooledMySQLConnection | MySQLConnectionAbstract | None = None
+
+    def open(self) -> None:
+        self.__conn = mysql.connector.connect(
+            host=Config.Database.HOST,
+            port=Config.Database.PORT,
+            user=Config.Database.USER,
+            password=Config.Database.PASSWORD,
+            database=Config.Database.DB_NAME,
+        )
+
+    def close(self) -> None:
+        if self.__conn is not None and self.__conn.is_connected():
+            self.__conn.close()
 
     def get_videos(self) -> list[Video]:
+        if self.__conn is None:
+            raise Exception("Database is not open")
+
         query = """
         SELECT id, video_url, cover_url, size, name, uploader, content, record_time, upload_time
         FROM videos
         ORDER BY upload_time DESC
         """
 
-        conn = self.__get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = self.__conn.cursor(dictionary=True)
 
         try:
             cursor.execute(query)
@@ -50,14 +65,16 @@ class DbAccessor(IDbAccessor):
             cursor.close()
 
     def get_video_metadata(self, video_id: str) -> VideoMetadata | None:
+        if self.__conn is None:
+            raise Exception("Database is not open")
+
         query = f"""
         SELECT id, video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5
         FROM video_metadata
         WHERE video_id=%s
         """
 
-        conn = self.__get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = self.__conn.cursor(dictionary=True)
 
         try:
             cursor.execute(query, (video_id,))
@@ -67,6 +84,8 @@ class DbAccessor(IDbAccessor):
                 return None
 
             video_metadata = VideoMetadata(
+                id=result["id"],
+                video_id=result["video_id"],
                 width=result["width"],
                 height=result["height"],
                 fps=result["fps"],
@@ -86,6 +105,9 @@ class DbAccessor(IDbAccessor):
             cursor.close()
 
     def add_video_metadata(self, metadata: VideoMetadata) -> bool:
+        if self.__conn is None:
+            raise Exception("Database is not open")
+
         """添加视频元数据到数据库"""
         query = """
         INSERT INTO video_metadata (video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5)
@@ -96,8 +118,7 @@ class DbAccessor(IDbAccessor):
             create_time=VALUES(create_time), modify_time=VALUES(modify_time), md5=VALUES(md5)
         """
 
-        conn = self.__get_connection()
-        cursor = conn.cursor()
+        cursor = self.__conn.cursor()
 
         try:
             cursor.execute(query, (
@@ -112,37 +133,19 @@ class DbAccessor(IDbAccessor):
                 metadata.modify_time,
                 metadata.md5
             ))
-            conn.commit()
+            self.__conn.commit()
             Logger.info(f"添加视频元数据成功 (VideoId={metadata.video_id})")
             return True
         except Exception as e:
             Logger.error(f"添加视频元数据失败: {e}")
-            conn.rollback()
+            self.__conn.rollback()
             return False
         finally:
             cursor.close()
 
     def __enter__(self):
+        self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__close_connection()
-
-    def __get_connection(self):
-        if self.__conn is not None and self.__conn.is_connected():
-            return self.__conn
-
-        self.__conn = mysql.connector.connect(
-            host=Config.Database.HOST,
-            port=Config.Database.PORT,
-            user=Config.Database.USER,
-            password=Config.Database.PASSWORD,
-            database=Config.Database.DB_NAME,
-        )
-
-        return self.__conn
-
-    def __close_connection(self):
-        if self.__conn is not None and self.__conn.is_connected():
-            self.__conn.close()
-            self.__conn = None
+        self.close()
