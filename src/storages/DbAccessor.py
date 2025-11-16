@@ -22,6 +22,9 @@ class DbAccessor(IDbAccessor):
             database=Config.Database.DB_NAME,
         )
 
+        if not self.__conn.is_connected():
+            raise ConnectionError("数据库连接失败")
+
     def close(self) -> None:
         if self.__conn is not None and self.__conn.is_connected():
             self.__conn.close()
