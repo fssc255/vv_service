@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query
 from typing import Union
 from models.requests.VideoAddRequest import VideoAddRequest
@@ -7,11 +8,37 @@ from models.responses.VideoAddResponse import VideoAddResponse
 from models.responses.VideoRemoveResponse import VideoRemoveResponse
 from VAService import VAService
 from Config import Config
+from storages.DbAccessor import DbAccessor
+from storages.VectorDbAccessor import VectorDbAccessor
 from utils.Logger import Logger
 import uvicorn
 
-app = FastAPI()
-va_service = VAService()
+va_service: VAService = None  # type:ignore
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动时初始化
+    global va_service
+    try:
+        db_accessor = DbAccessor()
+        db_accessor.open()
+
+        vector_db_accessor = VectorDbAccessor()
+        vector_db_accessor.open()
+
+        va_service = VAService(
+            db_accessor=db_accessor,
+            vector_db_accessor=vector_db_accessor
+        )
+        Logger.info("VAService 初始化成功")
+        yield
+    finally:
+        # 关闭时清理资源
+        Logger.info("正在关闭数据库连接...")
+        db_accessor.close()
+        vector_db_accessor.close()
+        Logger.info("资源清理完成")
 
 
 def unhandled_error(e: Exception):
@@ -20,6 +47,9 @@ def unhandled_error(e: Exception):
         success=False,
         message=f"Unhandled Error: {type(e)}{e}",
     )
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")

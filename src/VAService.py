@@ -16,10 +16,7 @@ from utils.Logger import Logger
 
 
 class VAService:
-    def __init__(self) -> None:
-        db_accessor = DumbDbAccessor()
-        vector_db_accessor = DumbVectorDbAccessor()
-
+    def __init__(self, db_accessor: IDbAccessor, vector_db_accessor: IVectorDbAccessor) -> None:
         self.__image_feature_extractor = ImageFeatureExtractor()
         self.__db_accessor: IDbAccessor = db_accessor
         self.__vector_db_accessor: IVectorDbAccessor = vector_db_accessor
@@ -53,20 +50,6 @@ class VAService:
         except Exception as e:
             Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
             return None
-
-        # TODO: 记得删，实际数据添加靠上级后端
-        self.__db_accessor.add_video(Video(
-            id=video_metadata.video_id,
-            video_url="",
-            cover_url="",
-            size="",
-            name="",
-            uploader="",
-            content="",
-            record_time="",
-            upload_time=""
-        ))
-        self.__db_accessor.add_video_metadata(video_metadata)
 
         return video_metadata
 

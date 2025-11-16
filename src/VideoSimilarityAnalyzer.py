@@ -31,10 +31,11 @@ class VideoSimilarityAnalyzer:
         if metadata_similarity < 0:
             return 0
         elif metadata_similarity > 1:
+            Logger.info(f"({video1_id}, {video2_id}) MD5 相同")
             return 1
 
         semantics_similarity = self.__calculate_semantics_similarity(video1_id, video2_id)
-        if metadata_similarity < 0:
+        if semantics_similarity < 0:
             return 0
 
         comprehensive_similarity = metadata_similarity * 0.3 + semantics_similarity * 0.7
@@ -42,7 +43,7 @@ class VideoSimilarityAnalyzer:
         Logger.info(
             f"({video1_id}, {video2_id}) 元数据相似度: {metadata_similarity:.3f}, 语义相似度: {semantics_similarity:.3f}, 综合相似度: {comprehensive_similarity:.3f}")
 
-        return comprehensive_similarity
+        return max(comprehensive_similarity, 0)
 
     def __calculate_metadata_similarity(self, video1_id: str, video2_id: str) -> float:
         video1_metadata = self.__db_accessor.get_video_metadata(video1_id)
@@ -71,8 +72,7 @@ class VideoSimilarityAnalyzer:
             video2_metadata.duration,
         ))
 
-        comp_similarity = sum(np.vectorize(lambda x, y: min(x, y) / max(x, y))(data1, data2) * (0.01, 0.01, 0.18, 0.8))
-        return max(comp_similarity, 0)
+        return sum(np.vectorize(lambda x, y: min(x, y) / max(x, y))(data1, data2) * (0.01, 0.01, 0.18, 0.8))
 
     def __calculate_semantics_similarity(self,  video1_id: str, video2_id: str) -> float:
         def get_or_add_video_feature_vector(video_id: str) -> list[np.ndarray] | None:

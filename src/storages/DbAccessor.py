@@ -11,17 +11,32 @@ import mysql.connector
 
 class DbAccessor(IDbAccessor):
     def __init__(self) -> None:
-        self.__conn:  MySQLConnectionAbstract | PooledMySQLConnection | None = None
+        self.__conn: PooledMySQLConnection | MySQLConnectionAbstract | None = None
+
+    def open(self) -> None:
+        self.__conn = mysql.connector.connect(
+            host=Config.Database.HOST,
+            port=Config.Database.PORT,
+            user=Config.Database.USER,
+            password=Config.Database.PASSWORD,
+            database=Config.Database.DB_NAME,
+        )
+
+    def close(self) -> None:
+        if self.__conn is not None and self.__conn.is_connected():
+            self.__conn.close()
 
     def get_videos(self) -> list[Video]:
+        if self.__conn is None:
+            raise Exception("Database is not open")
+
         query = """
         SELECT id, video_url, cover_url, size, name, uploader, content, record_time, upload_time
         FROM videos
         ORDER BY upload_time DESC
         """
 
-        conn = self.__get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = self.__conn.cursor(dictionary=True)
 
         try:
             cursor.execute(query)
@@ -50,14 +65,16 @@ class DbAccessor(IDbAccessor):
             cursor.close()
 
     def get_video_metadata(self, video_id: str) -> VideoMetadata | None:
+        if self.__conn is None:
+            raise Exception("Database is not open")
+
         query = f"""
         SELECT id, video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5
         FROM video_metadata
         WHERE video_id=%s
         """
 
-        conn = self.__get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = self.__conn.cursor(dictionary=True)
 
         try:
             cursor.execute(query, (video_id,))
@@ -67,6 +84,8 @@ class DbAccessor(IDbAccessor):
                 return None
 
             video_metadata = VideoMetadata(
+                id=result["id"],
+                video_id=result["video_id"],
                 width=result["width"],
                 height=result["height"],
                 fps=result["fps"],
@@ -77,6 +96,7 @@ class DbAccessor(IDbAccessor):
                 modify_time=result["modify_time"],
                 md5=result["md5"],
             )
+            video_metadata.video_id = video_id
             return video_metadata
         except Exception as e:
             Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
@@ -85,26 +105,8 @@ class DbAccessor(IDbAccessor):
             cursor.close()
 
     def __enter__(self):
+        self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__close_connection()
-
-    def __get_connection(self):
-        if self.__conn is not None and self.__conn.is_connected():
-            return self.__conn
-
-        self.__conn = mysql.connector.connect(
-            host=Config.Database.HOST,
-            port=Config.Database.PORT,
-            user=Config.Database.USER,
-            password=Config.Database.PASSWORD,
-            database=Config.Database.DB_NAME,
-        )
-
-        return self.__conn
-
-    def __close_connection(self):
-        if self.__conn is not None and self.__conn.is_connected():
-            self.__conn.close()
-            self.__conn = None
+        self.close()
