@@ -14,8 +14,16 @@ pip install uv # 或者用其他方法
 
 执行脚本
 
+Linux
+
 ```bash
 ./start-service.sh
+```
+
+Windows
+
+```bash
+start-service.bat
 ```
 
 初次运行涉及到依赖下载与模型下载，请稍作等候
