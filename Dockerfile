@@ -1,32 +1,39 @@
-# 1. 轻量基础镜像（无 Python，20MB 左右）
-FROM debian:slim
+# 使用 Ubuntu 基础镜像（更稳定）
+FROM ubuntu:22.04
 
-# 2. 安装 UV 必需的最小依赖（curl + HTTPS 证书）
+# 设置非交互式安装以避免提示
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# 安装Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*  # 清理缓存，减少体积
+    libgl1 \
+    libglib2.0-0 \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# 3. 安装 UV（官方脚本，独立于系统 Python）
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# 安装 UV
+RUN python3 -m pip install uv -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
-# 4. 将 UV 加入环境变量（确保全局可执行）
-ENV PATH="/root/.cargo/bin:${PATH}"
+# 设置工作目录
+WORKDIR /app/va
 
-# 5. 设置工作目录（统一文件路径）
-WORKDIR /app
+# 复制文件
+COPY pyproject.toml uv.lock ./
+COPY src ./src/
+COPY entrypoint.sh ./
 
-# 6. 复制关键文件
-COPY pyproject.toml ./
-COPY uv.lock ./
-COPY src ./
-COPY .start-service.sh ./
+# 安装依赖
+ENV HF_ENDPOINT=https://hf-mirror.com
+ENV UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
+RUN uv sync -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
-# 7. 给启动脚本添加执行权限（避免本地未设置权限导致执行失败）
-RUN chmod +x .start-service.sh
+# 给启动脚本添加执行权限
+RUN chmod +x entrypoint.sh
 
-# 8. 暴露脚本中用到的端口（需与 .start-service.sh 内的端口一致，如 8000）
+# 暴露所需端口
 EXPOSE 6950
 
-# 9. 执行启动脚本（核心命令）
-CMD ["./.start-service.sh"]
+# 执行启动脚本
+CMD ["./entrypoint.sh"]
