@@ -16,9 +16,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # 5. 设置工作目录（统一文件路径）
 WORKDIR /app
 
-# 6. 复制关键文件（依赖配置 + 启动脚本）
-# 优先复制依赖配置（利用 Docker 缓存，仅依赖变更时重新安装）
-COPY pyproject.toml uv.lock ./
+# 6. 复制关键文件
+COPY pyproject.toml ./
+COPY uv.lock ./
 COPY src ./
 COPY .start-service.sh ./
 
