@@ -12,7 +12,7 @@ pip install uv # 或者用其他方法
 
 **2.运行**
 
-执行脚本
+（1）通过执行启动脚本直接运行
 
 Linux
 
@@ -29,6 +29,12 @@ start-service.bat
 初次运行涉及到依赖下载与模型下载，请稍作等候
 
 若要终止，使用`Ctrl + C`
+
+（2）使用 docker compose
+
+```bash
+docker compose up
+```
 
 ## API 定义
 
