@@ -20,20 +20,17 @@ RUN python3 -m pip install uv -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/s
 WORKDIR /app/va
 
 # 复制文件
-COPY pyproject.toml uv.lock ./
 COPY src/* ./
-COPY entrypoint.sh ./
+COPY pyproject.toml ./
+COPY uv.lock ./
 
 # 安装依赖
 ENV HF_ENDPOINT=https://hf-mirror.com
 ENV UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
 RUN uv sync -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
-# 给启动脚本添加执行权限
-RUN chmod +x entrypoint.sh
-
 # 暴露所需端口
 EXPOSE 6950
 
-# 执行启动脚本
+# 启动命令
 CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6590"]
