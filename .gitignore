@@ -1,5 +1,6 @@
 src/logs/
 src/vector_db/
+example/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
