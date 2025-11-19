@@ -7,8 +7,6 @@ from Config import Config
 from utils.Logger import Logger
 import uvicorn
 
-va_service = VAService()
-
 
 def unhandled_error(e: Exception):
     Logger.error(f"{e}")
@@ -18,6 +16,7 @@ def unhandled_error(e: Exception):
     )
 
 
+va_service = VAService()
 app = FastAPI()
 
 
