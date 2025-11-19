@@ -1,80 +1,32 @@
-from dataclasses import dataclass
 import os
-from typing import Optional
 from VideoSimilarityAnalyzer import VideoSimilarityAnalyzer
-from models.VideoMetadata import VideoMetadata
-from storages.DbAccessor import DbAccessor
-from models.Video import Video
 from models.SimilarVideoGroup import SimilarVideoGroup
 from storages.IDbAccessor import IDbAccessor
 from storages.IVectorDbAccessor import IVectorDbAccessor
-from storages.memory.dumbs import DumbDbAccessor, DumbVectorDbAccessor
-from VideoMetadataExtractor import VideoMetadataExtractor
-from ImageFeatureExtractor import ImageFeatureExtractor
-from utils.KeyframesSampler import KeyframesSampler
 from utils.Logger import Logger
 
 
 class VAService:
     def __init__(self, db_accessor: IDbAccessor, vector_db_accessor: IVectorDbAccessor) -> None:
-        self.__image_feature_extractor = ImageFeatureExtractor()
         self.__db_accessor: IDbAccessor = db_accessor
         self.__vector_db_accessor: IVectorDbAccessor = vector_db_accessor
 
-    def add_video(self, video_id: str, video_file_path: str) -> Optional[VideoMetadata]:
-        if not os.path.exists(video_file_path) or os.path.isdir(video_file_path):
-            Logger.info(f"视频文件不存在 (File={video_file_path})")
-            raise FileNotFoundError(video_file_path)
-
-        # 1.获取视频元数据
-        try:
-            Logger.info(f"获取视频元数据 (File={video_file_path})")
-            video_metadata = VideoMetadataExtractor.get_metadata(video_file_path)
-            video_metadata.video_id = video_id
-        except Exception as e:
-            Logger.error(f"无法获取视频的元数据 (File=`{video_file_path}`, Error={e})")
-            return None
-
-        # 2.采样关键帧，计算特征向量并添加到向量数据库
-        try:
-            Logger.info(f"采样视频关键帧 (File={video_file_path})")
-            keyframes = KeyframesSampler.sample(video_file_path, 10)
-        except Exception as e:
-            Logger.error(f"无法提取视频的关键帧 (File=`{video_file_path}`, Error={e})")
-            return None
-
-        try:
-            Logger.info(f"计算视频关键帧特征向量 (File={video_file_path})")
-            feature_vectors = [self.__image_feature_extractor.get_feature_vector(x) for x in keyframes]
-            self.__vector_db_accessor.add(video_id, feature_vectors)
-        except Exception as e:
-            Logger.error(f"从视频的关键帧中提取特征向量时发生错误 (File=`{video_file_path}`, Error={e})")
-            return None
-
-        return video_metadata
-
-    def delete_video(self, video_id: str) -> bool:
-        try:
-            self.__vector_db_accessor.delete(video_id)
-            return True
-        except Exception as e:
-            Logger.error(f"从向量数据库中删除 {video_id} 时发生错误 (Error={e})")
-            return False
-
     def find_similar_videos(self, threshold: float) -> list[SimilarVideoGroup]:
-        video_similarity_analyzer = VideoSimilarityAnalyzer(
-            dbAccessor=self.__db_accessor,
-            vectorDbAccessor=self.__vector_db_accessor,
-        )
-
-        videos = self.__db_accessor.get_videos()
+        video_similarity_analyzer = VideoSimilarityAnalyzer()
 
         compare_cache: dict[str, float] = {}
         processed_video_id_set: set[str] = set()
         similar_group_list: list[SimilarVideoGroup] = []
 
-        # 1.筛选相似组
-        for reference_video in videos:
+        videos = [x for x in self.__db_accessor.get_videos()
+                  if os.path.exists(x.file_path) and (not os.path.isdir(x.file_path))]
+
+        Logger.info(f"正在从{len(videos)}个视频中查找相似视频...")
+
+        # 1.初步筛选相似组
+        for order, reference_video in enumerate(videos):
+            Logger.info(f"[{order + 1}/{len(videos)}] 当前参考视频: {reference_video.id}")
+
             # 跳过已处理
             if reference_video.id in processed_video_id_set:
                 continue
@@ -85,6 +37,7 @@ class VAService:
                 reference_video=reference_video.id,
                 similar_videos={}
             )
+
             for test_video in videos:
                 # 跳过自比较
                 if reference_video.id == test_video.id:
@@ -93,6 +46,8 @@ class VAService:
                 # 跳过已处理
                 if test_video.id in processed_video_id_set:
                     continue
+
+                Logger.info(f"比较 ({reference_video.id}, {test_video.id})")
 
                 if reference_video.id < test_video.id:
                     first_video, second_video = reference_video, test_video
@@ -104,7 +59,7 @@ class VAService:
                 if cache_id in compare_cache:
                     similarity = compare_cache[cache_id]
                 else:
-                    similarity = video_similarity_analyzer.get_similarity(first_video.id, second_video.id)
+                    similarity = video_similarity_analyzer.get_similarity(first_video, second_video)
                     compare_cache[cache_id] = similarity
 
                 # 若相似度达到阈值，加入到相似组
@@ -116,6 +71,6 @@ class VAService:
                 similar_group_list.append(similar_group)
 
         # 2.精化相似组，处理被重复添加的视频，只保留相似度最大的组
-        # TODO
+        # 没啥必要了，留着仅做优化提示
 
         return similar_group_list

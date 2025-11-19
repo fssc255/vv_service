@@ -2,8 +2,7 @@ from Config import Config
 from mysql.connector.abstracts import MySQLConnectionAbstract
 from mysql.connector.pooling import PooledMySQLConnection
 from typing import Any
-from models.Video import Video
-from models.VideoMetadata import VideoMetadata
+from models.tables.Video import Video
 from storages.IDbAccessor import IDbAccessor
 from utils.Logger import Logger
 import mysql.connector
@@ -34,9 +33,8 @@ class DbAccessor(IDbAccessor):
             raise Exception("Database is not open")
 
         query = """
-        SELECT id, video_url, cover_url, size, name, uploader, content, record_time, upload_time
+        SELECT id, file_path
         FROM videos
-        ORDER BY upload_time DESC
         """
 
         cursor = self.__conn.cursor(dictionary=True)
@@ -49,14 +47,7 @@ class DbAccessor(IDbAccessor):
             for row in results:
                 video = Video(
                     id=row["id"],
-                    video_url=row["video_url"],
-                    cover_url=row["cover_url"],
-                    size=row["size"],
-                    name=row["name"],
-                    uploader=row["uploader"],
-                    content=row["content"],
-                    record_time=row["record_time"],
-                    upload_time=row["upload_time"]
+                    file_path=row["file_path"],
                 )
                 videos.append(video)
 
@@ -64,46 +55,6 @@ class DbAccessor(IDbAccessor):
         except Exception as e:
             Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
             return []
-        finally:
-            cursor.close()
-
-    def get_video_metadata(self, video_id: str) -> VideoMetadata | None:
-        if self.__conn is None:
-            raise Exception("Database is not open")
-
-        query = f"""
-        SELECT id, video_id, width, height, fps, duration, file_type, file_size, create_time, modify_time, md5
-        FROM video_metadata
-        WHERE video_id=%s
-        """
-
-        cursor = self.__conn.cursor(dictionary=True)
-
-        try:
-            cursor.execute(query, (video_id,))
-            result: Any = cursor.fetchone()
-
-            if result is None:
-                return None
-
-            video_metadata = VideoMetadata(
-                id=result["id"],
-                video_id=result["video_id"],
-                width=result["width"],
-                height=result["height"],
-                fps=result["fps"],
-                duration=result["duration"],
-                file_type=result["file_type"],
-                file_size=result["file_size"],
-                create_time=result["create_time"],
-                modify_time=result["modify_time"],
-                md5=result["md5"],
-            )
-            video_metadata.video_id = video_id
-            return video_metadata
-        except Exception as e:
-            Logger.error(f"查询数据库时出现错误: SQL={query}, Error={e}")
-            return None
         finally:
             cursor.close()
 

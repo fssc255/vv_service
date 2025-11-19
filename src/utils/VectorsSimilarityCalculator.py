@@ -3,7 +3,8 @@ import numpy as np
 
 
 class VectorsSimilarityCalculator:
-    def calculate(self, first_vectors: list[np.ndarray], second_vectors: list[np.ndarray]) -> float:
+    @staticmethod
+    def calculate(first_vectors: list[np.ndarray], second_vectors: list[np.ndarray]) -> float:
         """
         计算两个向量的相似度
 

@@ -6,8 +6,22 @@ import hashlib
 
 
 class VideoMetadataExtractor:
-    @staticmethod
-    def get_metadata(video_file_path: str) -> VideoMetadata:
+    def __init__(self) -> None:
+        self.__cache: dict[str, VideoMetadata] = {}
+
+    def get_metadata(self, video_file_path: str) -> VideoMetadata:
+        if not os.path.exists(video_file_path):
+            raise FileNotFoundError(video_file_path)
+
+        if video_file_path in self.__cache:
+            return self.__cache[video_file_path]
+
+        video_metadata = self.__get_metadata(video_file_path)
+        self.__cache[video_file_path] = video_metadata
+
+        return video_metadata
+
+    def __get_metadata(self, video_file_path: str) -> VideoMetadata:
         def parse_int(value: Any) -> int | None:
             try:
                 return int(value)
@@ -20,13 +34,7 @@ class VideoMetadataExtractor:
             except:
                 return None
 
-        if not os.path.exists(video_file_path):
-            raise FileNotFoundError(video_file_path)
-
-        metadata = {
-            "id": -1,
-            "video_id": "",
-        }
+        metadata = {}
         media_info = MediaInfo.parse(video_file_path)
 
         file_stat = os.stat(video_file_path)

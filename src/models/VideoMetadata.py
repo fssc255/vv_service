@@ -1,11 +1,9 @@
 from typing import Optional
-from pydantic import BaseModel
-from pydantic.alias_generators import to_camel
+from dataclasses import dataclass
 
 
-class VideoMetadata(BaseModel):
-    id: int
-    video_id: str
+@dataclass
+class VideoMetadata:
     width: Optional[int]
     height: Optional[int]
     fps: Optional[float]
@@ -15,7 +13,3 @@ class VideoMetadata(BaseModel):
     create_time: int
     modify_time: int
     md5: str
-
-    class Config:
-        alias_generator = to_camel
-        populate_by_name = True
