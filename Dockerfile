@@ -21,7 +21,7 @@ WORKDIR /app/va
 
 # 复制文件
 COPY pyproject.toml uv.lock ./
-COPY src ./src/
+COPY src/* ./
 COPY entrypoint.sh ./
 
 # 安装依赖
@@ -36,4 +36,4 @@ RUN chmod +x entrypoint.sh
 EXPOSE 6950
 
 # 执行启动脚本
-CMD ["./entrypoint.sh"]
+CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6590"]
