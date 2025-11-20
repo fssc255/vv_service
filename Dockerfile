@@ -47,9 +47,6 @@ COPY --from=builder /app/.venv /app/.venv
 # 为入口脚本添加可执行权限
 RUN chmod +x entrypoint.sh
 
-# 启动venv虚拟环境
-RUN source /app/.venv/bin/activate
-
 # 暴露所需端口
 EXPOSE 6590
 
