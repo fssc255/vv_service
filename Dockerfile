@@ -7,8 +7,6 @@ ENV DEBIAN_FRONTEND="noninteractive"
 
 # 安装Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
-    libglib2.0-0 \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/* \
@@ -34,17 +32,6 @@ RUN uv sync
 # === 2.生产环境运行 ===
 # 使用 Ubuntu 基础镜像
 FROM ubuntu:22.04
-
-# 设置非交互式安装以避免提示
-ENV DEBIAN_FRONTEND="noninteractive"
-
-# 安装Python
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
-    libglib2.0-0 \
-    python3 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
 
 WORKDIR /app
 
