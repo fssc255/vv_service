@@ -6,4 +6,4 @@ services:
     environment:
       - HF_ENDPOINT=https://hf-mirror.com
       - UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
-    command: uv run uvicorn app:app --host "127.0.0.1" --port 6590
+    command: ./entrypoint.sh

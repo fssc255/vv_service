@@ -23,6 +23,7 @@ WORKDIR /app/va
 COPY src/ .
 COPY pyproject.toml .
 COPY uv.lock .
+COPY entrypoint.sh .
 
 # 安装依赖
 ENV HF_ENDPOINT=https://hf-mirror.com
@@ -35,4 +36,4 @@ RUN uv sync
 EXPOSE 6950
 
 # 启动命令
-CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6590"]
+CMD ["./entrypoint.sh"]
