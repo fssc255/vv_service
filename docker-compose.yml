@@ -3,6 +3,4 @@ services:
     build: .
     ports:
       - "6590:6590"
-    environment:
-      - HF_ENDPOINT=https://hf-mirror.com
     command: ./entrypoint.sh

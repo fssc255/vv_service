@@ -18,6 +18,7 @@ WORKDIR /app
 
 # 复制文件
 COPY src/ .
+COPY weights .
 COPY pyproject.toml .
 COPY uv.lock .
 COPY entrypoint.sh .
