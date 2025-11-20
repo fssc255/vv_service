@@ -33,15 +33,19 @@ RUN uv sync
 # 使用 Ubuntu 基础镜像
 FROM ubuntu:22.04
 
+# 配置当前工作目录
 WORKDIR /app
 
-# 复制文件
+# 配置环境变量
 ENV PATH="/app/.venv/bin:$PATH"
 ENV HF_ENDPOINT=https://hf-mirror.com
+
+# 复制文件
 COPY src/ .
 COPY entrypoint.sh .
 COPY --from=builder /app/.venv /app/.venv
 
+# 为入口脚本添加可执行权限
 RUN chmod +x entrypoint.sh
 
 # 暴露所需端口
