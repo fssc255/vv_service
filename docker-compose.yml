@@ -5,5 +5,4 @@ services:
       - "6590:6590"
     environment:
       - HF_ENDPOINT=https://hf-mirror.com
-      - UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
     command: ./entrypoint.sh
