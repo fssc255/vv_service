@@ -29,7 +29,7 @@ COPY entrypoint.sh .
 ENV HF_ENDPOINT=https://hf-mirror.com
 ENV UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
 ENV UV_NO_CACHE=true
-ENV UV_INDEX=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+ENV UV_DEFAULT_INDEX=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 RUN uv sync
 
 # 暴露所需端口
