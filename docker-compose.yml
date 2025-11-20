@@ -4,8 +4,8 @@ services:
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: video_manage_system
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=video_manage_system
     volumes:
       - vms_mysql_data:/var/lib/mysql
     ports:
@@ -17,7 +17,7 @@ services:
     build: .
     container_name: vms-backend-va
     environment:
-      - VMS_VA_DATABASE_HOST: mysql-db
+      - VMS_VA_DATABASE_HOST=mysql-db
     ports:
       - "6590:6590"
     command: ./entrypoint.sh
