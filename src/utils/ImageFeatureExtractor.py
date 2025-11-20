@@ -51,7 +51,5 @@ class ImageFeatureExtractor:
 
         with torch.no_grad():
             # 输入预处理后的张量，得到特征输出（形状为[1, 512, 1, 1]）
-            vector = self.__feature_extractor(img_tensor).squeeze().numpy()
-            vector = vector.cpu().numpy()
-
-        return vector
+            vector = self.__feature_extractor(img_tensor).squeeze().cpu().numpy()
+            return vector
