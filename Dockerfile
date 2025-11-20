@@ -1,5 +1,5 @@
 # === 1.构建 ===
-# 使用 Ubuntu 基础镜像（更稳定）
+# 使用 Ubuntu 基础镜像
 FROM ubuntu:22.04 AS builder
 
 # 设置非交互式安装以避免提示
@@ -32,7 +32,7 @@ RUN uv sync
 
 
 # === 2.生产环境运行 ===
-# 使用 Ubuntu 基础镜像（更稳定）
+# 使用 Ubuntu 基础镜像
 FROM ubuntu:22.04
 
 # 设置非交互式安装以避免提示
