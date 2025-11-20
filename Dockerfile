@@ -5,13 +5,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND="noninteractive"
 
 # 安装 Python
-RUN apt update && apt install -y --no-install-recommends \
-    python3.12 \
-    python3.12-pip
-RUN rm -rf /var/lib/apt/lists/* && apt clean
-
-# 安装 UV
-RUN python3 -m pip install uv -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # 设置工作目录
 WORKDIR /app
