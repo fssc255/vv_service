@@ -1,19 +1,19 @@
 services:
-  mysql-db:
+  vms-mysql-db:
     image: mysql:8.0
-    container_name: mysql-db
+    container_name: vms-mysql-db
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=video_manage_system
     volumes:
-      - vms_mysql_data:/var/lib/mysql
+      - vms-mysql-data:/var/lib/mysql
     ports:
       - "6932:3306"
     networks:
       - app-network
 
-  backend-va:
+  vms-backend-va:
     build: .
     container_name: vms-backend-va
     environment:
@@ -22,12 +22,12 @@ services:
       - "6590:6590"
     command: ./entrypoint.sh
     depends_on:
-      - mysql-db
+      - vms-mysql-db
     networks:
       - app-network
 
 volumes:
-  vms_mysql_data:
+  vms-mysql-data:
 
 networks:
   app-network:
