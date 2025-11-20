@@ -27,7 +27,7 @@ services:
       - app-network
 
 volumes:
-  vms_mysql_data
+  vms_mysql_data:
 
 networks:
   app-network:
