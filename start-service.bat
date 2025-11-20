@@ -1,8 +1,7 @@
 @echo off
 chcp 65001 >nul
 
-set HF_ENDPOINT=https://hf-mirror.com
+set UV_DEFAULT_INDEX=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+set UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
 
-uv sync -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-cd src && uv run uvicorn app:app --host 127.0.0.1 --port 6590
+uv sync && cd src && uv run uvicorn app:app --host 127.0.0.1 --port 6590
