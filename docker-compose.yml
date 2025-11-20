@@ -9,7 +9,7 @@ services:
     volumes:
       - vms_mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "6932:3306"
     networks:
       - app-network
 
