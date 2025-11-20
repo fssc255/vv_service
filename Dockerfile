@@ -20,14 +20,16 @@ RUN python3 -m pip install uv -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/s
 WORKDIR /app/va
 
 # 复制文件
-COPY src/* ./
-COPY pyproject.toml ./
-COPY uv.lock ./
+COPY src/ .
+COPY pyproject.toml .
+COPY uv.lock .
 
 # 安装依赖
 ENV HF_ENDPOINT=https://hf-mirror.com
 ENV UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
-RUN uv sync -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+ENV UV_NO_CACHE=true
+ENV UV_INDEX=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+RUN uv sync
 
 # 暴露所需端口
 EXPOSE 6950
