@@ -33,3 +33,6 @@ RUN chmod +x entrypoint.sh
 
 # 暴露所需端口
 EXPOSE 6590
+
+# 启动命令
+CMD ["./entrypoint.sh"]
