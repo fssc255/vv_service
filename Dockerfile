@@ -6,8 +6,8 @@ ENV DEBIAN_FRONTEND="noninteractive"
 
 # 安装 Python
 RUN apt update && apt install -y --no-install-recommends \
-    python3.13 \
-    python3.13-pip
+    python3.12 \
+    python3.12-pip
 RUN rm -rf /var/lib/apt/lists/* && apt clean
 
 # 安装 UV
