@@ -22,7 +22,7 @@ COPY pyproject.toml .
 COPY uv.lock .
 COPY entrypoint.sh .
 
-# 安装依赖
+# 同步环境
 ENV UV_PYTHON_INSTALL_MIRROR=https://registry.npmmirror.com/-/binary/python-build-standalone
 ENV UV_NO_CACHE=true
 ENV UV_DEFAULT_INDEX=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
@@ -30,6 +30,9 @@ RUN uv sync
 
 # 为入口脚本添加可执行权限
 RUN chmod +x entrypoint.sh
+
+# 配置 PATH
+ENV PATH=/app/.venv/bin:$PATH
 
 # 暴露所需端口
 EXPOSE 6590

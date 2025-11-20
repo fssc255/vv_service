@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/app/.venv/bin/python -m uvicorn app:app --host "0.0.0.0" --port 6590
+uvicorn app:app --host "0.0.0.0" --port 6590
